@@ -83,9 +83,31 @@ class SystemTrayManager(QObject):
         """Create the system tray context menu"""
         self.tray_menu = QMenu()
         
+        # Detect current theme for proper icon colors
+        theme = self.config_manager.get("theme", "auto")
+        if theme == "auto":
+            # Use dock window theme detection if available
+            if self.dock_window:
+                is_dark = self.dock_window.is_dark_theme()
+            else:
+                # Fallback theme detection
+                try:
+                    import winreg
+                    key = winreg.OpenKey(
+                        winreg.HKEY_CURRENT_USER,
+                        r"Software\Microsoft\Windows\CurrentVersion\Themes\Personalize"
+                    )
+                    value, _ = winreg.QueryValueEx(key, "AppsUseLightTheme")
+                    winreg.CloseKey(key)
+                    is_dark = value == 0  # 0 = dark theme, 1 = light theme
+                except:
+                    is_dark = False  # Default to light theme
+        else:
+            is_dark = theme == "dark"
+        
         # Show/Hide dock action
         self.show_hide_action = QAction("Показати док", self)
-        show_icon = get_wdock_icon("show_dock", size=16)
+        show_icon = get_wdock_icon("show_dock", size=16, is_dark=is_dark)
         if show_icon:
             self.show_hide_action.setIcon(show_icon)
         self.show_hide_action.triggered.connect(self.toggle_dock_visibility)
@@ -134,7 +156,7 @@ class SystemTrayManager(QObject):
         
         # Settings action
         settings_action = QAction("Налаштування...", self)
-        settings_icon = get_wdock_icon("settings_main", size=16)
+        settings_icon = get_wdock_icon("settings_main", size=16, is_dark=is_dark)
         if settings_icon:
             settings_action.setIcon(settings_icon)
         settings_action.triggered.connect(self.settings_requested.emit)
@@ -142,7 +164,7 @@ class SystemTrayManager(QObject):
         
         # About action
         about_action = QAction("Про програму...", self)
-        about_icon = get_wdock_icon("about", size=16)
+        about_icon = get_wdock_icon("about", size=16, is_dark=is_dark)
         if about_icon:
             about_action.setIcon(about_icon)
         about_action.triggered.connect(self.about_requested.emit)
@@ -152,7 +174,7 @@ class SystemTrayManager(QObject):
         
         # Quit action
         quit_action = QAction("Завершити WDock", self)
-        quit_icon = get_wdock_icon("exit_app", size=16)
+        quit_icon = get_wdock_icon("exit_app", size=16, is_dark=is_dark)
         if quit_icon:
             quit_action.setIcon(quit_icon)
         quit_action.triggered.connect(self.quit_requested.emit)
@@ -224,14 +246,34 @@ class SystemTrayManager(QObject):
     
     def update_dock_status(self, is_visible: bool):
         """Update the show/hide action text and icon based on dock visibility"""
+        # Detect current theme for proper icon colors
+        theme = self.config_manager.get("theme", "auto")
+        if theme == "auto":
+            if self.dock_window:
+                is_dark = self.dock_window.is_dark_theme()
+            else:
+                try:
+                    import winreg
+                    key = winreg.OpenKey(
+                        winreg.HKEY_CURRENT_USER,
+                        r"Software\Microsoft\Windows\CurrentVersion\Themes\Personalize"
+                    )
+                    value, _ = winreg.QueryValueEx(key, "AppsUseLightTheme")
+                    winreg.CloseKey(key)
+                    is_dark = value == 0
+                except:
+                    is_dark = False
+        else:
+            is_dark = theme == "dark"
+        
         if is_visible:
             self.show_hide_action.setText("Приховати док")
-            hide_icon = get_wdock_icon("hide_dock", size=16)
+            hide_icon = get_wdock_icon("hide_dock", size=16, is_dark=is_dark)
             if hide_icon:
                 self.show_hide_action.setIcon(hide_icon)
         else:
             self.show_hide_action.setText("Показати док")
-            show_icon = get_wdock_icon("show_dock", size=16)
+            show_icon = get_wdock_icon("show_dock", size=16, is_dark=is_dark)
             if show_icon:
                 self.show_hide_action.setIcon(show_icon)
     

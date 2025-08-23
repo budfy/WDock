@@ -460,7 +460,7 @@ class GroupWidget(QWidget):
         
         current_name = self.group_data.get("name", "")
         new_name, ok = QInputDialog.getText(
-            self, "Переименовать группу", "Новое имя группы:", text=current_name
+            self, "Перейменування групи", "Нова назва групи:", text=current_name
         )
         
         if ok and new_name.strip():
@@ -477,7 +477,7 @@ class GroupWidget(QWidget):
         
         current_icon = self.group_data.get("icon", "📁")
         new_icon, ok = QInputDialog.getItem(
-            self, "Выбрать иконку", "Выберите иконку для группы:",
+            self, "Вибрати іконку", "Виберіть іконку для групи:",
             emojis, emojis.index(current_icon) if current_icon in emojis else 0,
             False
         )
@@ -492,8 +492,8 @@ class GroupWidget(QWidget):
         from PyQt6.QtWidgets import QMessageBox
         
         reply = QMessageBox.question(
-            self, "Разгруппировка", 
-            f"Разгруппировать '{self.group_data.get('name', 'эту группу')}'?\nВсе ярлыки останутся в доке.",
+            self, "Розгрупування", 
+            f"Розгрупувати '{self.group_data.get('name', 'цю групу')}'?\nУсі ярлики залишаться в доку.",
             QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No,
             QMessageBox.StandardButton.No
         )
@@ -507,8 +507,8 @@ class GroupWidget(QWidget):
         from PyQt6.QtWidgets import QMessageBox
         
         reply = QMessageBox.question(
-            self, "Удаление группы", 
-            f"Удалить группу '{self.group_data.get('name', '')}'?\nВсе ярлыки в группе будут удалены из дока.",
+            self, "Видалення групи", 
+            f"Видалити групу '{self.group_data.get('name', '')}'?\nУсі ярлики в групі будуть видалені з доку.",
             QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No,
             QMessageBox.StandardButton.No
         )

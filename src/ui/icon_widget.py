@@ -418,9 +418,19 @@ class IconWidget(QWidget):
         # Import here to avoid circular imports
         from ..utils.lucide_icons import get_wdock_icon
         
+        # Get dock window to detect current theme
+        dock_window = self.get_dock_window()
+        is_dark = False
+        if dock_window:
+            theme = dock_window.config_manager.get("theme", "auto")
+            if theme == "auto":
+                is_dark = dock_window.is_dark_theme()
+            else:
+                is_dark = theme == "dark"
+        
         # Open action
         open_action = QAction("Відкрити", self)
-        open_icon = get_wdock_icon("home", size=16)
+        open_icon = get_wdock_icon("home", size=16, is_dark=is_dark)
         if open_icon:
             open_action.setIcon(open_icon)
         open_action.triggered.connect(self.launch_application)
@@ -430,7 +440,7 @@ class IconWidget(QWidget):
         
         # Rename action
         rename_action = QAction("Перейменувати", self)
-        rename_icon = get_wdock_icon("edit_app", size=16)
+        rename_icon = get_wdock_icon("edit_app", size=16, is_dark=is_dark)
         if rename_icon:
             rename_action.setIcon(rename_icon)
         rename_action.triggered.connect(self.rename_icon)
@@ -438,7 +448,7 @@ class IconWidget(QWidget):
         
         # Remove action
         remove_action = QAction("Видалити з доку", self)
-        remove_icon = get_wdock_icon("remove_app", size=16)
+        remove_icon = get_wdock_icon("remove_app", size=16, is_dark=is_dark)
         if remove_icon:
             remove_action.setIcon(remove_icon)
         remove_action.triggered.connect(self.remove_from_dock)
@@ -446,7 +456,7 @@ class IconWidget(QWidget):
         
         # Properties action
         properties_action = QAction("Властивості ярлика", self)
-        properties_icon = get_wdock_icon("settings_main", size=16)
+        properties_icon = get_wdock_icon("settings_main", size=16, is_dark=is_dark)
         if properties_icon:
             properties_action.setIcon(properties_icon)
         properties_action.triggered.connect(self.show_properties)
@@ -466,12 +476,19 @@ class IconWidget(QWidget):
         # Import here to avoid circular imports
         from ..utils.lucide_icons import get_wdock_icon
         
-        # Get dock window to access config manager
+        # Get dock window to access config manager and theme
         dock_window = self.get_dock_window()
         if not dock_window:
             return
         
         config_manager = dock_window.config_manager
+        
+        # Detect current theme for proper icon colors
+        theme = config_manager.get("theme", "auto")
+        if theme == "auto":
+            is_dark = dock_window.is_dark_theme()
+        else:
+            is_dark = theme == "dark"
         
         # Position submenu
         position_menu = menu.addMenu("Прикріпити до")
@@ -530,7 +547,7 @@ class IconWidget(QWidget):
         
         # Settings action
         settings_action = QAction("Налаштування...", self)
-        settings_icon = get_wdock_icon("settings_main", size=16)
+        settings_icon = get_wdock_icon("settings_main", size=16, is_dark=is_dark)
         if settings_icon:
             settings_action.setIcon(settings_icon)
         settings_action.triggered.connect(self.show_settings)
@@ -538,7 +555,7 @@ class IconWidget(QWidget):
         
         # About action
         about_action = QAction("Про програму...", self)
-        about_icon = get_wdock_icon("about", size=16)
+        about_icon = get_wdock_icon("about", size=16, is_dark=is_dark)
         if about_icon:
             about_action.setIcon(about_icon)
         about_action.triggered.connect(self.show_about)
@@ -548,7 +565,7 @@ class IconWidget(QWidget):
         
         # Quit action
         quit_action = QAction("Завершити WDock", self)
-        quit_icon = get_wdock_icon("exit_app", size=16)
+        quit_icon = get_wdock_icon("exit_app", size=16, is_dark=is_dark)
         if quit_icon:
             quit_action.setIcon(quit_icon)
         quit_action.triggered.connect(self.quit_application)

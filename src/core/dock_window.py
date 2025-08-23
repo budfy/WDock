@@ -455,6 +455,13 @@ class DockWindow(QWidget):
         # Import here to avoid circular imports
         from ..utils.lucide_icons import get_wdock_icon
         
+        # Detect current theme for proper icon colors
+        theme = self.config_manager.get("theme", "auto")
+        if theme == "auto":
+            is_dark = self.is_dark_theme()
+        else:
+            is_dark = theme == "dark"
+        
         # Position submenu
         position_menu = menu.addMenu("Прикріпити до")
         
@@ -512,7 +519,7 @@ class DockWindow(QWidget):
         
         # Settings action
         settings_action = QAction("Налаштування...", self)
-        settings_icon = get_wdock_icon("settings_main", size=16)
+        settings_icon = get_wdock_icon("settings_main", size=16, is_dark=is_dark)
         if settings_icon:
             settings_action.setIcon(settings_icon)
         settings_action.triggered.connect(self.show_settings)
@@ -520,7 +527,7 @@ class DockWindow(QWidget):
         
         # About action
         about_action = QAction("Про програму...", self)
-        about_icon = get_wdock_icon("about", size=16)
+        about_icon = get_wdock_icon("about", size=16, is_dark=is_dark)
         if about_icon:
             about_action.setIcon(about_icon)
         about_action.triggered.connect(self.show_about)
@@ -530,7 +537,7 @@ class DockWindow(QWidget):
         
         # Quit action
         quit_action = QAction("Завершити WDock", self)
-        quit_icon = get_wdock_icon("exit_app", size=16)
+        quit_icon = get_wdock_icon("exit_app", size=16, is_dark=is_dark)
         if quit_icon:
             quit_action.setIcon(quit_icon)
         quit_action.triggered.connect(self.quit_application)

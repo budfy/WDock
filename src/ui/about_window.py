@@ -118,9 +118,25 @@ class AboutWindow(QDialog):
         # Buttons
         button_layout = QHBoxLayout()
         
+        # Import here to avoid issues
+        from ..utils.lucide_icons import get_wdock_icon
+        
+        # Detect current theme for proper icon colors
+        try:
+            import winreg
+            key = winreg.OpenKey(
+                winreg.HKEY_CURRENT_USER,
+                r"Software\Microsoft\Windows\CurrentVersion\Themes\Personalize"
+            )
+            value, _ = winreg.QueryValueEx(key, "AppsUseLightTheme")
+            winreg.CloseKey(key)
+            is_dark = value == 0  # 0 = dark theme, 1 = light theme
+        except:
+            is_dark = False  # Default to light theme
+        
         # GitHub button (placeholder for future)
         github_button = QPushButton("GitHub")
-        github_icon = get_wdock_icon("external", size=16)
+        github_icon = get_wdock_icon("external", size=16, is_dark=is_dark)
         if github_icon:
             github_button.setIcon(github_icon)
         github_button.clicked.connect(self.open_github)
@@ -130,7 +146,7 @@ class AboutWindow(QDialog):
         
         # Close button
         close_button = QPushButton("Закрити")
-        close_icon = get_wdock_icon("close", size=16)
+        close_icon = get_wdock_icon("close", size=16, is_dark=is_dark)
         if close_icon:
             close_button.setIcon(close_icon)
         close_button.clicked.connect(self.accept)
