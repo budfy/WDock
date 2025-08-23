@@ -37,8 +37,19 @@ class ConfigManager:
         """Load configuration from file or create default"""
         self.ensure_config_dir()
         
-        if not self.config_file.exists():
-            return self.default_config.copy()
+        is_first_launch = not self.config_file.exists()
+        
+        if is_first_launch:
+            # First launch - use defaults and save immediately
+            config = self.default_config.copy()
+            # Save the default configuration on first launch
+            # This ensures the user sees their choices persisted
+            try:
+                with open(self.config_file, 'w', encoding='utf-8') as f:
+                    json.dump(config, f, indent=2, ensure_ascii=False)
+            except (PermissionError, OSError) as e:
+                print(f"Warning: Could not save initial config: {e}")
+            return config
         
         try:
             with open(self.config_file, 'r', encoding='utf-8') as f:

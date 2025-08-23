@@ -454,44 +454,105 @@ class IconWidget(QWidget):
         
         menu.addSeparator()
         
-        # Dock menu
-        dock_menu = menu.addMenu("Меню доку")
-        self.add_dock_menu_actions(dock_menu)
+        # Complete dock menu - same as right-clicking on dock
+        self.add_complete_dock_menu(menu)
         
         # Show menu
         global_pos = self.mapToGlobal(position)
         menu.exec(global_pos)
     
-    def add_dock_menu_actions(self, menu: QMenu):
-        """Add dock-specific menu actions"""
+    def add_complete_dock_menu(self, menu: QMenu):
+        """Add complete dock menu actions (same as dock context menu)"""
+        # Import here to avoid circular imports
+        from ..utils.lucide_icons import get_wdock_icon
+        
+        # Get dock window to access config manager
+        dock_window = self.get_dock_window()
+        if not dock_window:
+            return
+        
+        config_manager = dock_window.config_manager
+        
         # Position submenu
-        position_menu = menu.addMenu("Прикрепить к")
+        position_menu = menu.addMenu("Прикріпити до")
         
         positions = [
             ("Верх", "top"),
             ("Низ", "bottom"),
-            ("Лево", "left"),
+            ("Ліво", "left"),
             ("Право", "right")
         ]
         
+        current_pos = config_manager.get("position", "bottom")
         for text, pos in positions:
             action = QAction(text, self)
+            action.setCheckable(True)
+            action.setChecked(pos == current_pos)
             action.triggered.connect(lambda checked, p=pos: self.change_dock_position(p))
             position_menu.addAction(action)
         
         # Alignment submenu
-        alignment_menu = menu.addMenu("Выравнивание")
+        alignment_menu = menu.addMenu("Вирівнювання")
         
         alignments = [
-            ("Лево/Верх", "start"),
+            ("Ліво/Верх", "start"),
             ("По центру", "center"),
             ("Право/Низ", "end")
         ]
         
+        current_align = config_manager.get("alignment", "center")
         for text, align in alignments:
             action = QAction(text, self)
+            action.setCheckable(True)
+            action.setChecked(align == current_align)
             action.triggered.connect(lambda checked, a=align: self.change_dock_alignment(a))
             alignment_menu.addAction(action)
+        
+        menu.addSeparator()
+        
+        # Auto-hide action
+        auto_hide_action = QAction("Автоприховування", self)
+        auto_hide_action.setCheckable(True)
+        auto_hide_value = config_manager.get("auto_hide", True)
+        auto_hide_action.setChecked(bool(auto_hide_value) if auto_hide_value is not None else True)
+        auto_hide_action.triggered.connect(self.toggle_auto_hide)
+        menu.addAction(auto_hide_action)
+        
+        # Intelligent hide action
+        intelligent_hide_action = QAction("Розумне приховування", self)
+        intelligent_hide_action.setCheckable(True)
+        intelligent_hide_value = config_manager.get("intelligent_hide", True)
+        intelligent_hide_action.setChecked(bool(intelligent_hide_value) if intelligent_hide_value is not None else True)
+        intelligent_hide_action.triggered.connect(self.toggle_intelligent_hide)
+        menu.addAction(intelligent_hide_action)
+        
+        menu.addSeparator()
+        
+        # Settings action
+        settings_action = QAction("Налаштування...", self)
+        settings_icon = get_wdock_icon("settings_main", size=16)
+        if settings_icon:
+            settings_action.setIcon(settings_icon)
+        settings_action.triggered.connect(self.show_settings)
+        menu.addAction(settings_action)
+        
+        # About action
+        about_action = QAction("Про програму...", self)
+        about_icon = get_wdock_icon("about", size=16)
+        if about_icon:
+            about_action.setIcon(about_icon)
+        about_action.triggered.connect(self.show_about)
+        menu.addAction(about_action)
+        
+        menu.addSeparator()
+        
+        # Quit action
+        quit_action = QAction("Завершити WDock", self)
+        quit_icon = get_wdock_icon("exit_app", size=16)
+        if quit_icon:
+            quit_action.setIcon(quit_icon)
+        quit_action.triggered.connect(self.quit_application)
+        menu.addAction(quit_action)
     
     def rename_icon(self):
         """Rename the icon (change display name)"""
@@ -499,7 +560,7 @@ class IconWidget(QWidget):
         
         current_name = self.icon_data.get("name", "")
         new_name, ok = QInputDialog.getText(
-            self, "Переименовать", "Новое имя:", text=current_name
+            self, "Перейменування", "Нова назва:", text=current_name
         )
         
         if ok and new_name.strip():
@@ -512,8 +573,8 @@ class IconWidget(QWidget):
         from PyQt6.QtWidgets import QMessageBox
         
         reply = QMessageBox.question(
-            self, "Удаление", 
-            f"Удалить '{self.icon_data.get('name', 'этот ярлык')}' из дока?",
+            self, "Видалення", 
+            f"Видалити '{self.icon_data.get('name', 'цей ярлик')}' з доку?",
             QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No,
             QMessageBox.StandardButton.No
         )
@@ -549,6 +610,36 @@ class IconWidget(QWidget):
         dock_window = self.get_dock_window()
         if dock_window:
             dock_window.change_dock_alignment(alignment)
+    
+    def toggle_auto_hide(self):
+        """Toggle auto-hide functionality"""
+        dock_window = self.get_dock_window()
+        if dock_window:
+            dock_window.toggle_auto_hide()
+    
+    def toggle_intelligent_hide(self):
+        """Toggle intelligent hide functionality"""
+        dock_window = self.get_dock_window()
+        if dock_window:
+            dock_window.toggle_intelligent_hide()
+    
+    def show_settings(self):
+        """Show settings window"""
+        dock_window = self.get_dock_window()
+        if dock_window:
+            dock_window.show_settings()
+    
+    def show_about(self):
+        """Show about window"""
+        dock_window = self.get_dock_window()
+        if dock_window:
+            dock_window.show_about()
+    
+    def quit_application(self):
+        """Quit the application"""
+        dock_window = self.get_dock_window()
+        if dock_window:
+            dock_window.quit_application()
     
     def get_dock_window(self):
         """Get the parent dock window"""

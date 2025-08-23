@@ -141,7 +141,7 @@ class DockWindow(QWidget):
         # Determine theme
         theme = self.config_manager.get("theme", "auto")
         if theme == "auto":
-            # TODO: Detect Windows theme
+            # Detect Windows theme automatically
             is_dark = self.is_dark_theme()
         else:
             is_dark = theme == "dark"
