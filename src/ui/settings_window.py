@@ -26,6 +26,7 @@ class SettingsWindow(QDialog):
     def __init__(self, config_manager, parent=None):
         super().__init__(parent)
         self.config_manager = config_manager
+        self.settings_manager = config_manager.settings_manager  # Use unified settings
         self.startup_manager = StartupManager()
         self.setWindowTitle("Налаштування WDock")
         self.setFixedSize(500, 600)
@@ -342,8 +343,8 @@ class SettingsWindow(QDialog):
         
         config_layout.addLayout(config_buttons_layout)
         
-        # Config location
-        config_info = QLabel(f"Файл конфігурації: {self.config_manager.config_file}")
+        # Config location info
+        config_info = QLabel(f"Налаштування: {self.settings_manager.get_settings_file_path()}\nДані дока: {self.config_manager.config_file}")
         config_info.setWordWrap(True)
         config_info.setStyleSheet("color: #666666; font-size: 10px;")
         config_layout.addWidget(config_info)
@@ -363,43 +364,43 @@ class SettingsWindow(QDialog):
     def load_settings(self):
         """Load current settings into the UI"""
         # Position
-        current_position = self.config_manager.get("position", "bottom")
+        current_position = self.settings_manager.get("general", "position", "bottom")
         for button in self.position_group.buttons():
             if button.property("position") == current_position:
                 button.setChecked(True)
                 break
         
         # Alignment
-        current_alignment = self.config_manager.get("alignment", "center")
+        current_alignment = self.settings_manager.get("general", "alignment", "center")
         for button in self.alignment_group.buttons():
             if button.property("alignment") == current_alignment:
                 button.setChecked(True)
                 break
         
         # Theme
-        current_theme = self.config_manager.get("theme", "auto")
+        current_theme = self.settings_manager.get("appearance", "theme", "auto")
         for button in self.theme_group.buttons():
             if button.property("theme") == current_theme:
                 button.setChecked(True)
                 break
         
         # Checkboxes
-        self.auto_hide_checkbox.setChecked(self.config_manager.get("auto_hide", True))
-        self.intelligent_hide_checkbox.setChecked(self.config_manager.get("intelligent_hide", True))
-        self.show_tray_checkbox.setChecked(self.config_manager.get("show_tray", True))
-        self.minimize_to_tray_checkbox.setChecked(self.config_manager.get("minimize_to_tray", True))
-        self.debug_mode_checkbox.setChecked(self.config_manager.get("debug_mode", False))
-        self.show_borders_checkbox.setChecked(self.config_manager.get("show_borders", False))
+        self.auto_hide_checkbox.setChecked(self.settings_manager.get("behavior", "auto_hide", True))
+        self.intelligent_hide_checkbox.setChecked(self.settings_manager.get("behavior", "intelligent_hide", True))
+        self.show_tray_checkbox.setChecked(self.settings_manager.get("system_tray", "show_tray_icon", True))
+        self.minimize_to_tray_checkbox.setChecked(self.settings_manager.get("system_tray", "minimize_to_tray", True))
+        self.debug_mode_checkbox.setChecked(self.settings_manager.get("debug", "debug_mode", False))
+        self.show_borders_checkbox.setChecked(self.settings_manager.get("debug", "show_widget_borders", False))
         
         # Startup status
         self.startup_checkbox.setChecked(self.startup_manager.is_startup_enabled())
         
         # Sliders and spinboxes
-        self.icon_size_slider.setValue(self.config_manager.get("icon_size", 48))
-        self.animation_speed_slider.setValue(self.config_manager.get("animation_speed", 200))
-        self.auto_hide_delay.setValue(self.config_manager.get("auto_hide_delay", 500))
-        self.memory_limit.setValue(self.config_manager.get("memory_limit", 50))
-        self.update_interval.setValue(self.config_manager.get("update_interval", 500))
+        self.icon_size_slider.setValue(self.settings_manager.get("appearance", "icon_size", 48))
+        self.animation_speed_slider.setValue(self.settings_manager.get("appearance", "animation_speed", 200))
+        self.auto_hide_delay.setValue(self.settings_manager.get("behavior", "auto_hide_delay", 500))
+        self.memory_limit.setValue(self.settings_manager.get("performance", "memory_limit", 50))
+        self.update_interval.setValue(self.settings_manager.get("performance", "update_interval", 500))
         
         # Update labels
         self.icon_size_label.setText(f"{self.icon_size_slider.value()} px")
@@ -433,7 +434,7 @@ class SettingsWindow(QDialog):
         for button in self.position_group.buttons():
             if button.isChecked():
                 position = button.property("position")
-                self.config_manager.set("position", position)
+                self.settings_manager.set("general", "position", position)
                 self.position_changed.emit(position)
                 break
         
@@ -441,30 +442,30 @@ class SettingsWindow(QDialog):
         for button in self.alignment_group.buttons():
             if button.isChecked():
                 alignment = button.property("alignment")
-                self.config_manager.set("alignment", alignment)
+                self.settings_manager.set("general", "alignment", alignment)
                 self.alignment_changed.emit(alignment)
                 break
         
         # Theme
         for button in self.theme_group.buttons():
             if button.isChecked():
-                self.config_manager.set("theme", button.property("theme"))
+                self.settings_manager.set("appearance", "theme", button.property("theme"))
                 break
         
         # Checkboxes
-        self.config_manager.set("auto_hide", self.auto_hide_checkbox.isChecked())
-        self.config_manager.set("intelligent_hide", self.intelligent_hide_checkbox.isChecked())
-        self.config_manager.set("show_tray", self.show_tray_checkbox.isChecked())
-        self.config_manager.set("minimize_to_tray", self.minimize_to_tray_checkbox.isChecked())
-        self.config_manager.set("debug_mode", self.debug_mode_checkbox.isChecked())
-        self.config_manager.set("show_borders", self.show_borders_checkbox.isChecked())
+        self.settings_manager.set("behavior", "auto_hide", self.auto_hide_checkbox.isChecked())
+        self.settings_manager.set("behavior", "intelligent_hide", self.intelligent_hide_checkbox.isChecked())
+        self.settings_manager.set("system_tray", "show_tray_icon", self.show_tray_checkbox.isChecked())
+        self.settings_manager.set("system_tray", "minimize_to_tray", self.minimize_to_tray_checkbox.isChecked())
+        self.settings_manager.set("debug", "debug_mode", self.debug_mode_checkbox.isChecked())
+        self.settings_manager.set("debug", "show_widget_borders", self.show_borders_checkbox.isChecked())
         
         # Sliders and spinboxes
-        self.config_manager.set("icon_size", self.icon_size_slider.value())
-        self.config_manager.set("animation_speed", self.animation_speed_slider.value())
-        self.config_manager.set("auto_hide_delay", self.auto_hide_delay.value())
-        self.config_manager.set("memory_limit", self.memory_limit.value())
-        self.config_manager.set("update_interval", self.update_interval.value())
+        self.settings_manager.set("appearance", "icon_size", self.icon_size_slider.value())
+        self.settings_manager.set("appearance", "animation_speed", self.animation_speed_slider.value())
+        self.settings_manager.set("behavior", "auto_hide_delay", self.auto_hide_delay.value())
+        self.settings_manager.set("performance", "memory_limit", self.memory_limit.value())
+        self.settings_manager.set("performance", "update_interval", self.update_interval.value())
     
     def reset_to_defaults(self):
         """Reset all settings to defaults"""
@@ -476,9 +477,8 @@ class SettingsWindow(QDialog):
         )
         
         if reply == QMessageBox.StandardButton.Yes:
-            # Reset config to defaults
-            self.config_manager.config = self.config_manager.default_config.copy()
-            self.config_manager.save_config()
+            # Reset settings to defaults
+            self.settings_manager.reset_to_defaults()
             
             # Reload UI
             self.load_settings()
@@ -489,17 +489,15 @@ class SettingsWindow(QDialog):
         """Export configuration to file"""
         filename, _ = QFileDialog.getSaveFileName(
             self, "Експорт налаштувань", 
-            "wdock_config.json", 
+            "wdock_settings.json", 
             "JSON Files (*.json)"
         )
         
         if filename:
-            try:
-                import shutil
-                shutil.copy2(self.config_manager.config_file, filename)
+            if self.settings_manager.export_settings(filename):
                 QMessageBox.information(self, "Експорт", f"Налаштування експортовано в:\n{filename}")
-            except Exception as e:
-                QMessageBox.critical(self, "Помилка експорту", f"Не вдалося експортувати налаштування:\n{e}")
+            else:
+                QMessageBox.critical(self, "Помилка експорту", "Не вдалося експортувати налаштування")
     
     def import_config(self):
         """Import configuration from file"""
@@ -518,17 +516,11 @@ class SettingsWindow(QDialog):
             )
             
             if reply == QMessageBox.StandardButton.Yes:
-                try:
-                    import shutil
-                    shutil.copy2(filename, self.config_manager.config_file)
-                    
-                    # Reload config
-                    self.config_manager.config = self.config_manager.load_config()
+                if self.settings_manager.import_settings(filename):
                     self.load_settings()
-                    
                     QMessageBox.information(self, "Імпорт", "Налаштування успішно імпортовано!")
-                except Exception as e:
-                    QMessageBox.critical(self, "Помилка імпорту", f"Не вдалося імпортувати налаштування:\n{e}")
+                else:
+                    QMessageBox.critical(self, "Помилка імпорту", "Не вдалося імпортувати налаштування")
     
     def on_startup_toggled(self, checked: bool):
         """Обробка зміни статусу автозапуску"""
@@ -551,7 +543,7 @@ class SettingsWindow(QDialog):
     
     def get_current_theme_is_dark(self) -> bool:
         """Get whether current theme should be dark based on configuration"""
-        theme = self.config_manager.get("theme", "auto")
+        theme = self.settings_manager.get("appearance", "theme", "auto")
         if theme == "auto":
             return self.is_dark_theme()
         else:
