@@ -1,0 +1,101 @@
+MIT License
+
+Copyright (c) 2025 WDock Project
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
+================================================================================
+
+DISCLAIMER OF WARRANTIES AND LIMITATION OF LIABILITY | ВІДМОВА ВІД ГАРАНТІЙ ТА ОБМЕЖЕННЯ ВІДПОВІДАЛЬНОСТІ
+
+English:
+This software is provided "AS IS" and is used at your own risk. The authors 
+and contributors make no warranties, express or implied, regarding the 
+functionality, reliability, or suitability of this software for any particular 
+purpose. You assume all risks associated with the use of this software.
+
+The authors shall not be liable for any direct, indirect, incidental, special, 
+exemplary, or consequential damages (including, but not limited to, procurement 
+of substitute goods or services; loss of use, data, or profits; or business 
+interruption) however caused and on any theory of liability, whether in contract, 
+strict liability, or tort (including negligence or otherwise) arising in any way 
+out of the use of this software, even if advised of the possibility of such damage.
+
+Українська:
+Це програмне забезпечення надається "ЯК Є" і використовується на ваш власний 
+ризик. Автори та співавтори не надають жодних гарантій, явних чи неявних, 
+щодо функціональності, надійності або придатності цього програмного забезпечення 
+для будь-яких конкретних цілей. Ви приймаєте на себе всі ризики, пов'язані з 
+використанням цього програмного забезпечення.
+
+Автори не несуть відповідальності за будь-які прямі, непрямі, випадкові, 
+особливі, зразкові або наслідувальні збитки (включаючи, але не обмежуючись, 
+придбання замінних товарів або послуг; втрату використання, даних або прибутків; 
+або переривання бізнесу), незалежно від причини та будь-якої теорії 
+відповідальності, чи то в контракті, суворій відповідальності або делікті 
+(включаючи недбалість або інше), що виникають будь-яким чином з використання 
+цього програмного забезпечення, навіть якщо було повідомлено про можливість 
+такого збитку.
+
+================================================================================
+
+SYSTEM REQUIREMENTS AND COMPATIBILITY | СИСТЕМНІ ВИМОГИ ТА СУМІСНІСТЬ
+
+English:
+- Operating System: Windows 10/11 (64-bit)
+- Python: 3.8 or higher
+- Dependencies: See requirements.txt
+- Hardware: Minimum 4GB RAM, 50MB disk space
+
+The software may not function correctly on unsupported systems or configurations.
+Users are responsible for ensuring system compatibility before installation.
+
+Українська:
+- Операційна система: Windows 10/11 (64-біт)
+- Python: 3.8 або вищий
+- Залежності: Див. requirements.txt
+- Апаратне забезпечення: Мінімум 4ГБ ОЗП, 50МБ дискового простору
+
+Програмне забезпечення може працювати неправильно на непідтримуваних системах 
+або конфігураціях. Користувачі відповідають за забезпечення сумісності системи 
+перед встановленням.
+
+================================================================================
+
+THIRD-PARTY COMPONENTS | КОМПОНЕНТИ ТРЕТІХ СТОРІН
+
+This software includes the following third-party components:
+- PyQt6: GPL v3 / Commercial License
+- pywin32: Python Software Foundation License
+- Pillow: Historical Permission Notice and Disclaimer (HPND)
+- psutil: BSD 3-Clause License
+- pygetwindow: BSD 3-Clause License
+- Lucide Icons: ISC License
+
+Each component is subject to its respective license terms.
+
+Це програмне забезпечення включає наступні компоненти третіх сторін:
+- PyQt6: GPL v3 / Комерційна ліцензія
+- pywin32: Ліцензія Python Software Foundation
+- Pillow: Історичне повідомлення про дозвіл та відмова від відповідальності (HPND)
+- psutil: BSD 3-Clause ліцензія
+- pygetwindow: BSD 3-Clause ліцензія
+- Lucide Icons: ISC ліцензія
+
+Кожен компонент підлягає відповідним умовам ліцензії.
