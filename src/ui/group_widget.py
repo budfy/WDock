@@ -414,40 +414,40 @@ class GroupWidget(QWidget):
         
         # Expand/Collapse action
         if self.is_expanded:
-            expand_action = QAction("Свернуть", self)
+            expand_action = QAction("Згорнути", self)
         else:
-            expand_action = QAction("Развернуть", self)
+            expand_action = QAction("Розгорнути", self)
         expand_action.triggered.connect(
             self.collapse_group if self.is_expanded else self.expand_group
         )
         menu.addAction(expand_action)
         
         # Rename group action
-        rename_action = QAction("Переименовать группу", self)
+        rename_action = QAction("Перейменувати групу", self)
         rename_action.triggered.connect(self.rename_group)
         menu.addAction(rename_action)
         
         # Change group icon action
-        icon_action = QAction("Задать иконку группы", self)
+        icon_action = QAction("Задати іконку групи", self)
         icon_action.triggered.connect(self.change_group_icon)
         menu.addAction(icon_action)
         
         menu.addSeparator()
         
         # Ungroup action
-        ungroup_action = QAction("Разгруппировать", self)
+        ungroup_action = QAction("Розгрупувати", self)
         ungroup_action.triggered.connect(self.ungroup)
         menu.addAction(ungroup_action)
         
         # Delete group action
-        delete_action = QAction("Удалить группу", self)
+        delete_action = QAction("Видалити групу", self)
         delete_action.triggered.connect(self.delete_group)
         menu.addAction(delete_action)
         
         menu.addSeparator()
         
         # Dock menu
-        dock_menu = menu.addMenu("Меню дока")
+        dock_menu = menu.addMenu("Меню доку")
         # TODO: Add dock menu actions
         
         # Show menu

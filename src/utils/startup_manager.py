@@ -81,9 +81,9 @@ class StartupManager:
     def get_startup_status_text(self) -> str:
         """Get human-readable startup status"""
         if self.is_startup_enabled():
-            return "WDock запускается при старте Windows"
+            return "WDock запускається при старті Windows"
         else:
-            return "WDock не запускается при старте Windows"
+            return "WDock не запускається при старті Windows"
     
     def cleanup_registry(self) -> bool:
         """Clean up registry entries (for uninstallation)"""

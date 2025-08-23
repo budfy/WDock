@@ -27,7 +27,7 @@ class SettingsWindow(QDialog):
         super().__init__(parent)
         self.config_manager = config_manager
         self.startup_manager = StartupManager()
-        self.setWindowTitle("Настройки WDock")
+        self.setWindowTitle("Налаштування WDock")
         self.setFixedSize(500, 600)
         self.setModal(True)
         
@@ -65,14 +65,14 @@ class SettingsWindow(QDialog):
         button_layout = QHBoxLayout()
         
         # Reset to defaults
-        reset_button = QPushButton("Сбросить")
+        reset_button = QPushButton("Скинути")
         reset_button.clicked.connect(self.reset_to_defaults)
         button_layout.addWidget(reset_button)
         
         button_layout.addStretch()
         
         # Cancel and OK buttons
-        cancel_button = QPushButton("Отмена")
+        cancel_button = QPushButton("Скасувати")
         cancel_button.clicked.connect(self.reject)
         button_layout.addWidget(cancel_button)
         
@@ -82,7 +82,7 @@ class SettingsWindow(QDialog):
         button_layout.addWidget(ok_button)
         
         # Apply button
-        apply_button = QPushButton("Применить")
+        apply_button = QPushButton("Застосувати")
         apply_button.clicked.connect(self.apply_settings)
         button_layout.addWidget(apply_button)
         
@@ -97,13 +97,13 @@ class SettingsWindow(QDialog):
         layout.setSpacing(20)
         
         # Position group
-        position_group = QGroupBox("Расположение дока")
+        position_group = QGroupBox("Розташування доку")
         position_layout = QGridLayout()
         
         self.position_group = QButtonGroup()
         positions = [
             ("Верх", "top", 0, 1),
-            ("Лево", "left", 1, 0),
+            ("Ліво", "left", 1, 0),
             ("Право", "right", 1, 2),
             ("Низ", "bottom", 2, 1)
         ]
@@ -118,14 +118,14 @@ class SettingsWindow(QDialog):
         layout.addWidget(position_group)
         
         # Alignment group
-        alignment_group = QGroupBox("Выравнивание")
+        alignment_group = QGroupBox("Вирівнювання")
         alignment_layout = QHBoxLayout()
         
         self.alignment_group = QButtonGroup()
         alignments = [
-            ("Начало", "start"),
+            ("Початок", "start"),
             ("Центр", "center"),
-            ("Конец", "end")
+            ("Кінець", "end")
         ]
         
         for text, value in alignments:
@@ -138,13 +138,13 @@ class SettingsWindow(QDialog):
         layout.addWidget(alignment_group)
         
         # Auto-startup
-        self.startup_checkbox = QCheckBox("Запускать при старте Windows")
+        self.startup_checkbox = QCheckBox("Запускати при старті Windows")
         self.startup_checkbox.toggled.connect(self.on_startup_toggled)
         layout.addWidget(self.startup_checkbox)
         
         layout.addStretch()
         tab.setLayout(layout)
-        self.tab_widget.addTab(tab, "Общие")
+        self.tab_widget.addTab(tab, "Загальні")
         
         # Add icon to tab if available
         general_icon = get_wdock_icon("settings_main", size=16, is_dark=self.get_current_theme_is_dark())
@@ -158,14 +158,14 @@ class SettingsWindow(QDialog):
         layout.setSpacing(20)
         
         # Theme group
-        theme_group = QGroupBox("Тема оформления")
+        theme_group = QGroupBox("Тема оформлення")
         theme_layout = QVBoxLayout()
         
         self.theme_group = QButtonGroup()
         themes = [
-            ("Автоматически (следовать системе)", "auto"),
-            ("Светлая тема", "light"),
-            ("Темная тема", "dark")
+            ("Автоматично (слідувати системі)", "auto"),
+            ("Світла тема", "light"),
+            ("Темна тема", "dark")
         ]
         
         for text, value in themes:
@@ -178,7 +178,7 @@ class SettingsWindow(QDialog):
         layout.addWidget(theme_group)
         
         # Icon size
-        icon_size_group = QGroupBox("Размер иконок")
+        icon_size_group = QGroupBox("Розмір іконок")
         icon_size_layout = QFormLayout()
         
         self.icon_size_slider = QSlider(Qt.Orientation.Horizontal)
@@ -192,13 +192,13 @@ class SettingsWindow(QDialog):
             lambda v: self.icon_size_label.setText(f"{v} px")
         )
         
-        icon_size_layout.addRow("Размер:", self.icon_size_slider)
+        icon_size_layout.addRow("Розмір:", self.icon_size_slider)
         icon_size_layout.addRow("", self.icon_size_label)
         icon_size_group.setLayout(icon_size_layout)
         layout.addWidget(icon_size_group)
         
         # Animation settings
-        animation_group = QGroupBox("Анимации")
+        animation_group = QGroupBox("Анімації")
         animation_layout = QFormLayout()
         
         self.animation_speed_slider = QSlider(Qt.Orientation.Horizontal)
@@ -212,14 +212,14 @@ class SettingsWindow(QDialog):
             lambda v: self.animation_speed_label.setText(f"{v} мс")
         )
         
-        animation_layout.addRow("Скорость:", self.animation_speed_slider)
+        animation_layout.addRow("Швидкість:", self.animation_speed_slider)
         animation_layout.addRow("", self.animation_speed_label)
         animation_group.setLayout(animation_layout)
         layout.addWidget(animation_group)
         
         layout.addStretch()
         tab.setLayout(layout)
-        self.tab_widget.addTab(tab, "Внешний вид")
+        self.tab_widget.addTab(tab, "Зовнішній вигляд")
         
         # Add icon to tab if available
         appearance_icon = get_wdock_icon("theme_auto", size=16, is_dark=self.get_current_theme_is_dark())
@@ -233,13 +233,13 @@ class SettingsWindow(QDialog):
         layout.setSpacing(20)
         
         # Auto-hide group
-        hide_group = QGroupBox("Автоскрытие")
+        hide_group = QGroupBox("Автоприховування")
         hide_layout = QVBoxLayout()
         
-        self.auto_hide_checkbox = QCheckBox("Включить автоскрытие")
+        self.auto_hide_checkbox = QCheckBox("Увімкнути автоприховування")
         hide_layout.addWidget(self.auto_hide_checkbox)
         
-        self.intelligent_hide_checkbox = QCheckBox("Умное скрытие (при полноэкранных приложениях)")
+        self.intelligent_hide_checkbox = QCheckBox("Розумне приховування (при повноекранних програмах)")
         hide_layout.addWidget(self.intelligent_hide_checkbox)
         
         # Auto-hide delay
@@ -248,40 +248,40 @@ class SettingsWindow(QDialog):
         self.auto_hide_delay.setRange(100, 5000)
         self.auto_hide_delay.setValue(500)
         self.auto_hide_delay.setSuffix(" мс")
-        delay_layout.addRow("Задержка скрытия:", self.auto_hide_delay)
+        delay_layout.addRow("Затримка приховування:", self.auto_hide_delay)
         
         hide_layout.addLayout(delay_layout)
         hide_group.setLayout(hide_layout)
         layout.addWidget(hide_group)
         
         # System tray
-        tray_group = QGroupBox("Системный трей")
+        tray_group = QGroupBox("Системний трей")
         tray_layout = QVBoxLayout()
         
-        self.show_tray_checkbox = QCheckBox("Показывать иконку в системном трее")
+        self.show_tray_checkbox = QCheckBox("Показувати іконку в системному треї")
         tray_layout.addWidget(self.show_tray_checkbox)
         
-        self.minimize_to_tray_checkbox = QCheckBox("Сворачивать в трей при закрытии")
+        self.minimize_to_tray_checkbox = QCheckBox("Згортати в трей при закритті")
         tray_layout.addWidget(self.minimize_to_tray_checkbox)
         
         tray_group.setLayout(tray_layout)
         layout.addWidget(tray_group)
         
         # Hotkeys group
-        hotkeys_group = QGroupBox("Горячие клавиши")
+        hotkeys_group = QGroupBox("Гарячі клавіші")
         hotkeys_layout = QFormLayout()
         
         self.toggle_hotkey = QLineEdit()
         self.toggle_hotkey.setPlaceholderText("Win+D")
         self.toggle_hotkey.setReadOnly(True)  # For future implementation
-        hotkeys_layout.addRow("Показать/скрыть док:", self.toggle_hotkey)
+        hotkeys_layout.addRow("Показати/приховати док:", self.toggle_hotkey)
         
         hotkeys_group.setLayout(hotkeys_layout)
         layout.addWidget(hotkeys_group)
         
         layout.addStretch()
         tab.setLayout(layout)
-        self.tab_widget.addTab(tab, "Поведение")
+        self.tab_widget.addTab(tab, "Поведінка")
         
         # Add icon to tab if available
         behavior_icon = get_wdock_icon("settings_main", size=16, is_dark=self.get_current_theme_is_dark())
@@ -295,55 +295,55 @@ class SettingsWindow(QDialog):
         layout.setSpacing(20)
         
         # Performance group
-        performance_group = QGroupBox("Производительность")
+        performance_group = QGroupBox("Продуктивність")
         performance_layout = QFormLayout()
         
         self.memory_limit = QSpinBox()
         self.memory_limit.setRange(25, 200)
         self.memory_limit.setValue(50)
         self.memory_limit.setSuffix(" МБ")
-        performance_layout.addRow("Лимит памяти:", self.memory_limit)
+        performance_layout.addRow("Ліміт пам'яті:", self.memory_limit)
         
         self.update_interval = QSpinBox()
         self.update_interval.setRange(100, 2000)
         self.update_interval.setValue(500)
         self.update_interval.setSuffix(" мс")
-        performance_layout.addRow("Интервал обновления:", self.update_interval)
+        performance_layout.addRow("Інтервал оновлення:", self.update_interval)
         
         performance_group.setLayout(performance_layout)
         layout.addWidget(performance_group)
         
         # Debug group
-        debug_group = QGroupBox("Отладка")
+        debug_group = QGroupBox("Налагодження")
         debug_layout = QVBoxLayout()
         
-        self.debug_mode_checkbox = QCheckBox("Режим отладки")
+        self.debug_mode_checkbox = QCheckBox("Режим налагодження")
         debug_layout.addWidget(self.debug_mode_checkbox)
         
-        self.show_borders_checkbox = QCheckBox("Показывать границы виджетов")
+        self.show_borders_checkbox = QCheckBox("Показувати межі віджетів")
         debug_layout.addWidget(self.show_borders_checkbox)
         
         debug_group.setLayout(debug_layout)
         layout.addWidget(debug_group)
         
         # Config management
-        config_group = QGroupBox("Управление конфигурацией")
+        config_group = QGroupBox("Управління конфігурацією")
         config_layout = QVBoxLayout()
         
         config_buttons_layout = QHBoxLayout()
         
-        export_button = QPushButton("Экспорт настроек...")
+        export_button = QPushButton("Експорт налаштувань...")
         export_button.clicked.connect(self.export_config)
         config_buttons_layout.addWidget(export_button)
         
-        import_button = QPushButton("Импорт настроек...")
+        import_button = QPushButton("Імпорт налаштувань...")
         import_button.clicked.connect(self.import_config)
         config_buttons_layout.addWidget(import_button)
         
         config_layout.addLayout(config_buttons_layout)
         
         # Config location
-        config_info = QLabel(f"Файл конфигурации: {self.config_manager.config_file}")
+        config_info = QLabel(f"Файл конфігурації: {self.config_manager.config_file}")
         config_info.setWordWrap(True)
         config_info.setStyleSheet("color: #666666; font-size: 10px;")
         config_layout.addWidget(config_info)
@@ -353,7 +353,7 @@ class SettingsWindow(QDialog):
         
         layout.addStretch()
         tab.setLayout(layout)
-        self.tab_widget.addTab(tab, "Дополнительно")
+        self.tab_widget.addTab(tab, "Додатково")
         
         # Add icon to tab if available
         advanced_icon = get_wdock_icon("settings_main", size=16, is_dark=self.get_current_theme_is_dark())
@@ -415,7 +415,7 @@ class SettingsWindow(QDialog):
         self.settings_changed.emit()
         
         # Show confirmation
-        QMessageBox.information(self, "Настройки", "Настройки применены!")
+        QMessageBox.information(self, "Налаштування", "Налаштування застосовано!")
     
     def accept_settings(self):
         """Accept and save settings"""
@@ -469,8 +469,8 @@ class SettingsWindow(QDialog):
     def reset_to_defaults(self):
         """Reset all settings to defaults"""
         reply = QMessageBox.question(
-            self, "Сброс настроек",
-            "Сбросить все настройки к значениям по умолчанию?",
+            self, "Скидання налаштувань",
+            "Скинути всі налаштування до значень за замовчуванням?",
             QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No,
             QMessageBox.StandardButton.No
         )
@@ -483,12 +483,12 @@ class SettingsWindow(QDialog):
             # Reload UI
             self.load_settings()
             
-            QMessageBox.information(self, "Сброс настроек", "Настройки сброшены к значениям по умолчанию!")
+            QMessageBox.information(self, "Скидання налаштувань", "Налаштування скинуто до значень за замовчуванням!")
     
     def export_config(self):
         """Export configuration to file"""
         filename, _ = QFileDialog.getSaveFileName(
-            self, "Экспорт настроек", 
+            self, "Експорт налаштувань", 
             "wdock_config.json", 
             "JSON Files (*.json)"
         )
@@ -497,22 +497,22 @@ class SettingsWindow(QDialog):
             try:
                 import shutil
                 shutil.copy2(self.config_manager.config_file, filename)
-                QMessageBox.information(self, "Экспорт", f"Настройки экспортированы в:\n{filename}")
+                QMessageBox.information(self, "Експорт", f"Налаштування експортовано в:\n{filename}")
             except Exception as e:
-                QMessageBox.critical(self, "Ошибка экспорта", f"Не удалось экспортировать настройки:\n{e}")
+                QMessageBox.critical(self, "Помилка експорту", f"Не вдалося експортувати налаштування:\n{e}")
     
     def import_config(self):
         """Import configuration from file"""
         filename, _ = QFileDialog.getOpenFileName(
-            self, "Импорт настроек", 
+            self, "Імпорт налаштувань", 
             "", 
             "JSON Files (*.json)"
         )
         
         if filename:
             reply = QMessageBox.question(
-                self, "Импорт настроек",
-                "Импорт настроек заменит текущую конфигурацию.\nПродолжить?",
+                self, "Імпорт налаштувань",
+                "Імпорт налаштувань замінить поточну конфігурацію.\nПродовжити?",
                 QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No,
                 QMessageBox.StandardButton.No
             )
@@ -526,26 +526,26 @@ class SettingsWindow(QDialog):
                     self.config_manager.config = self.config_manager.load_config()
                     self.load_settings()
                     
-                    QMessageBox.information(self, "Импорт", "Настройки успешно импортированы!")
+                    QMessageBox.information(self, "Імпорт", "Налаштування успішно імпортовано!")
                 except Exception as e:
-                    QMessageBox.critical(self, "Ошибка импорта", f"Не удалось импортировать настройки:\n{e}")
+                    QMessageBox.critical(self, "Помилка імпорту", f"Не вдалося імпортувати налаштування:\n{e}")
     
     def on_startup_toggled(self, checked: bool):
-        """Обработка изменения статуса автозапуска"""
+        """Обробка зміни статусу автозапуску"""
         if checked:
             success = self.startup_manager.enable_startup()
             if not success:
                 QMessageBox.warning(
-                    self, "Ошибка", 
-                    "Не удалось включить автозапуск.\nПроверьте права доступа."
+                    self, "Помилка", 
+                    "Не вдалося увімкнути автозапуск.\nПеревірте права доступу."
                 )
                 self.startup_checkbox.setChecked(False)
         else:
             success = self.startup_manager.disable_startup()
             if not success:
                 QMessageBox.warning(
-                    self, "Ошибка", 
-                    "Не удалось отключить автозапуск.\nПроверьте права доступа."
+                    self, "Помилка", 
+                    "Не вдалося вимкнути автозапуск.\nПеревірте права доступу."
                 )
                 self.startup_checkbox.setChecked(True)
     

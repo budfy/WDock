@@ -419,7 +419,7 @@ class IconWidget(QWidget):
         from ..utils.lucide_icons import get_wdock_icon
         
         # Open action
-        open_action = QAction("Открыть", self)
+        open_action = QAction("Відкрити", self)
         open_icon = get_wdock_icon("home", size=16)
         if open_icon:
             open_action.setIcon(open_icon)
@@ -429,7 +429,7 @@ class IconWidget(QWidget):
         menu.addSeparator()
         
         # Rename action
-        rename_action = QAction("Переименовать", self)
+        rename_action = QAction("Перейменувати", self)
         rename_icon = get_wdock_icon("edit_app", size=16)
         if rename_icon:
             rename_action.setIcon(rename_icon)
@@ -437,7 +437,7 @@ class IconWidget(QWidget):
         menu.addAction(rename_action)
         
         # Remove action
-        remove_action = QAction("Удалить из дока", self)
+        remove_action = QAction("Видалити з доку", self)
         remove_icon = get_wdock_icon("remove_app", size=16)
         if remove_icon:
             remove_action.setIcon(remove_icon)
@@ -445,7 +445,7 @@ class IconWidget(QWidget):
         menu.addAction(remove_action)
         
         # Properties action
-        properties_action = QAction("Свойства ярлыка", self)
+        properties_action = QAction("Властивості ярлика", self)
         properties_icon = get_wdock_icon("settings_main", size=16)
         if properties_icon:
             properties_action.setIcon(properties_icon)
@@ -455,7 +455,7 @@ class IconWidget(QWidget):
         menu.addSeparator()
         
         # Dock menu
-        dock_menu = menu.addMenu("Меню дока")
+        dock_menu = menu.addMenu("Меню доку")
         self.add_dock_menu_actions(dock_menu)
         
         # Show menu

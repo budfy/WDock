@@ -17,7 +17,7 @@ class AboutWindow(QDialog):
     
     def __init__(self, parent=None):
         super().__init__(parent)
-        self.setWindowTitle("О программе WDock")
+        self.setWindowTitle("Про програму WDock")
         self.setFixedSize(450, 350)
         self.setModal(True)
         
@@ -54,13 +54,13 @@ class AboutWindow(QDialog):
         title_label.setAlignment(Qt.AlignmentFlag.AlignLeft)
         title_layout.addWidget(title_label)
         
-        version_label = QLabel("Версия 1.0.0")
+        version_label = QLabel("Версія 1.0.0")
         version_font = QFont("Segoe UI", 12)
         version_label.setFont(version_font)
         version_label.setStyleSheet("color: #666666;")
         title_layout.addWidget(version_label)
         
-        subtitle_label = QLabel("Современная док-панель для Windows")
+        subtitle_label = QLabel("Сучасна док-панель для Windows")
         subtitle_font = QFont("Segoe UI", 10)
         subtitle_label.setFont(subtitle_font)
         subtitle_label.setStyleSheet("color: #888888;")
@@ -84,15 +84,15 @@ class AboutWindow(QDialog):
         description_text.setMaximumHeight(120)
         
         description_content = """
-<b>WDock</b> - это современная и настраиваемая док-панель для Windows, которая предоставляет быстрый доступ к вашим любимым приложениям.
+<b>WDock</b> - це сучасна і налаштовувана док-панель для Windows, яка надає швидкий доступ до ваших улюблених застосунків.
 
-<b>Основные возможности:</b>
-• Адаптивные иконки с эффектами наведения
-• Группировка ярликов перетаскиванием
-• Умное автоскрытие при полноэкранных приложениях
-• Поддержка темной и светлой темы
-• Плавные анимации и эффекты
-• Поддержка нескольких мониторов
+<b>Основні можливості:</b>
+• Адаптивні іконки з ефектами наведення
+• Групування ярликів перетягуванням
+• Розумне автоприховування при повноекранних застосунках
+• Підтримка темної і світлої теми
+• Плавні анімації і ефекти
+• Підтримка декількох моніторів
         """
         
         description_text.setHtml(description_content)
@@ -103,7 +103,7 @@ class AboutWindow(QDialog):
         
         # Python version
         python_version = f"Python {sys.version.split()[0]}"
-        python_label = QLabel(f"Построено на: {python_version}")
+        python_label = QLabel(f"Побудовано на: {python_version}")
         python_label.setStyleSheet("color: #666666; font-size: 10px;")
         info_layout.addWidget(python_label)
         
@@ -129,7 +129,7 @@ class AboutWindow(QDialog):
         button_layout.addStretch()
         
         # Close button
-        close_button = QPushButton("Закрыть")
+        close_button = QPushButton("Закрити")
         close_icon = get_wdock_icon("close", size=16)
         if close_icon:
             close_button.setIcon(close_icon)
@@ -230,7 +230,7 @@ class AboutWindow(QDialog):
         QMessageBox.information(
             self,
             "GitHub",
-            "GitHub repository будет доступен в будущих версиях.\n\nСледите за обновлениями!"
+            "GitHub repository буде доступний в майбутніх версіях.\n\nСлідкуйте за оновленнями!"
         )
 
 

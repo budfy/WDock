@@ -456,12 +456,12 @@ class DockWindow(QWidget):
         from ..utils.lucide_icons import get_wdock_icon
         
         # Position submenu
-        position_menu = menu.addMenu("Прикрепить к")
+        position_menu = menu.addMenu("Прикріпити до")
         
         positions = [
             ("Верх", "top"),
             ("Низ", "bottom"),
-            ("Лево", "left"),
+            ("Ліво", "left"),
             ("Право", "right")
         ]
         
@@ -474,10 +474,10 @@ class DockWindow(QWidget):
             position_menu.addAction(action)
         
         # Alignment submenu
-        alignment_menu = menu.addMenu("Выравнивание")
+        alignment_menu = menu.addMenu("Вирівнювання")
         
         alignments = [
-            ("Лево/Верх", "start"),
+            ("Ліво/Верх", "start"),
             ("По центру", "center"),
             ("Право/Низ", "end")
         ]
@@ -493,7 +493,7 @@ class DockWindow(QWidget):
         menu.addSeparator()
         
         # Auto-hide action
-        auto_hide_action = QAction("Автоскрытие", self)
+        auto_hide_action = QAction("Автоприховування", self)
         auto_hide_action.setCheckable(True)
         auto_hide_value = self.config_manager.get("auto_hide", True)
         auto_hide_action.setChecked(bool(auto_hide_value) if auto_hide_value is not None else True)
@@ -501,7 +501,7 @@ class DockWindow(QWidget):
         menu.addAction(auto_hide_action)
         
         # Intelligent hide action
-        intelligent_hide_action = QAction("Умное скрытие", self)
+        intelligent_hide_action = QAction("Розумне приховування", self)
         intelligent_hide_action.setCheckable(True)
         intelligent_hide_value = self.config_manager.get("intelligent_hide", True)
         intelligent_hide_action.setChecked(bool(intelligent_hide_value) if intelligent_hide_value is not None else True)
@@ -511,7 +511,7 @@ class DockWindow(QWidget):
         menu.addSeparator()
         
         # Settings action
-        settings_action = QAction("Настройки...", self)
+        settings_action = QAction("Налаштування...", self)
         settings_icon = get_wdock_icon("settings_main", size=16)
         if settings_icon:
             settings_action.setIcon(settings_icon)
@@ -519,7 +519,7 @@ class DockWindow(QWidget):
         menu.addAction(settings_action)
         
         # About action
-        about_action = QAction("О программе...", self)
+        about_action = QAction("Про програму...", self)
         about_icon = get_wdock_icon("about", size=16)
         if about_icon:
             about_action.setIcon(about_icon)
@@ -529,7 +529,7 @@ class DockWindow(QWidget):
         menu.addSeparator()
         
         # Quit action
-        quit_action = QAction("Завершить WDock", self)
+        quit_action = QAction("Завершити WDock", self)
         quit_icon = get_wdock_icon("exit_app", size=16)
         if quit_icon:
             quit_action.setIcon(quit_icon)
@@ -704,8 +704,8 @@ class DockWindow(QWidget):
         
         # Ask for group name
         group_name, ok = QInputDialog.getText(
-            self, "Новая группа", "Название группы:", 
-            text="Группа"
+            self, "Нова група", "Назва групи:", 
+            text="Група"
         )
         
         if ok and group_name.strip():

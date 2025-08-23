@@ -38,7 +38,7 @@ class SystemTrayManager(QObject):
         if not QSystemTrayIcon.isSystemTrayAvailable():
             QMessageBox.critical(
                 None, "WDock",
-                "Системный трей недоступен в этой системе."
+                "Системний трей недоступний в цій системі."
             )
             return False
         
@@ -47,7 +47,7 @@ class SystemTrayManager(QObject):
         icon = QIcon(icon_pixmap)
         
         self.tray_icon = QSystemTrayIcon(icon)
-        self.tray_icon.setToolTip("WDock - Панель быстрого запуска")
+        self.tray_icon.setToolTip("WDock - Панель швидкого запуску")
         
         return True
     
@@ -84,7 +84,7 @@ class SystemTrayManager(QObject):
         self.tray_menu = QMenu()
         
         # Show/Hide dock action
-        self.show_hide_action = QAction("Показать док", self)
+        self.show_hide_action = QAction("Показати док", self)
         show_icon = get_wdock_icon("show_dock", size=16)
         if show_icon:
             self.show_hide_action.setIcon(show_icon)
@@ -94,12 +94,12 @@ class SystemTrayManager(QObject):
         self.tray_menu.addSeparator()
         
         # Position submenu
-        position_menu = self.tray_menu.addMenu("Прикрепить к")
+        position_menu = self.tray_menu.addMenu("Прикріпити до")
         
         positions = [
             ("Верх", "top"),
             ("Низ", "bottom"),
-            ("Лево", "left"),
+            ("Ліво", "left"),
             ("Право", "right")
         ]
         
@@ -117,14 +117,14 @@ class SystemTrayManager(QObject):
             self.position_actions[current_pos].setChecked(True)
         
         # Auto-hide action
-        self.auto_hide_action = QAction("Автоскрытие", self)
+        self.auto_hide_action = QAction("Автоприховування", self)
         self.auto_hide_action.setCheckable(True)
         self.auto_hide_action.setChecked(self.config_manager.get("auto_hide", True))
         self.auto_hide_action.triggered.connect(self.toggle_auto_hide)
         self.tray_menu.addAction(self.auto_hide_action)
         
         # Intelligent hide action
-        self.intelligent_hide_action = QAction("Умное скрытие", self)
+        self.intelligent_hide_action = QAction("Розумне приховування", self)
         self.intelligent_hide_action.setCheckable(True)
         self.intelligent_hide_action.setChecked(self.config_manager.get("intelligent_hide", True))
         self.intelligent_hide_action.triggered.connect(self.toggle_intelligent_hide)
@@ -133,7 +133,7 @@ class SystemTrayManager(QObject):
         self.tray_menu.addSeparator()
         
         # Settings action
-        settings_action = QAction("Настройки...", self)
+        settings_action = QAction("Налаштування...", self)
         settings_icon = get_wdock_icon("settings_main", size=16)
         if settings_icon:
             settings_action.setIcon(settings_icon)
@@ -141,7 +141,7 @@ class SystemTrayManager(QObject):
         self.tray_menu.addAction(settings_action)
         
         # About action
-        about_action = QAction("О программе...", self)
+        about_action = QAction("Про програму...", self)
         about_icon = get_wdock_icon("about", size=16)
         if about_icon:
             about_action.setIcon(about_icon)
@@ -151,7 +151,7 @@ class SystemTrayManager(QObject):
         self.tray_menu.addSeparator()
         
         # Quit action
-        quit_action = QAction("Завершить WDock", self)
+        quit_action = QAction("Завершити WDock", self)
         quit_icon = get_wdock_icon("exit_app", size=16)
         if quit_icon:
             quit_action.setIcon(quit_icon)
@@ -225,12 +225,12 @@ class SystemTrayManager(QObject):
     def update_dock_status(self, is_visible: bool):
         """Update the show/hide action text and icon based on dock visibility"""
         if is_visible:
-            self.show_hide_action.setText("Скрыть док")
+            self.show_hide_action.setText("Приховати док")
             hide_icon = get_wdock_icon("hide_dock", size=16)
             if hide_icon:
                 self.show_hide_action.setIcon(hide_icon)
         else:
-            self.show_hide_action.setText("Показать док")
+            self.show_hide_action.setText("Показати док")
             show_icon = get_wdock_icon("show_dock", size=16)
             if show_icon:
                 self.show_hide_action.setIcon(show_icon)
