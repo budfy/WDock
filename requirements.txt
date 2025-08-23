@@ -1,0 +1,13 @@
+# WDock Dependencies | Залежності WDock
+# Modern GUI framework | Сучасний GUI фреймворк
+PyQt6>=6.4.0
+# SVG support for Lucide icons | Підтримка SVG для іконок Lucide
+PyQt6-SVG>=6.4.0
+# Windows system integration | Інтеграція з системою Windows
+pywin32>=305
+# Window management | Управління вікнами
+pygetwindow>=0.0.9
+# Image processing | Обробка зображень
+Pillow>=9.0.0
+# Performance monitoring | Моніторинг продуктивності
+psutil>=5.9.0

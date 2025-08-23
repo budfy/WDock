@@ -1,0 +1,3 @@
+"""
+WDock Core Components
+"""

@@ -1,0 +1,3 @@
+"""
+WDock User Interface Components
+"""
