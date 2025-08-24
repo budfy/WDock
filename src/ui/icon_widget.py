@@ -30,7 +30,15 @@ class IconWidget(QWidget):
     def __init__(self, icon_data: dict, parent=None):
         super().__init__(parent)
         self.icon_data = icon_data
-        self.icon_size = 48  # Default size
+        
+        # Get configured icon size from settings (use parent's config if available)
+        self.icon_size = 48  # Default fallback
+        if parent and hasattr(parent, 'config_manager'):
+            self.icon_size = parent.config_manager.get_setting("appearance", "icon_size", 48)
+        
+        # Set widget size based on icon size (icon + padding)
+        widget_size = self.icon_size + 16  # 8px padding on each side
+        
         self.is_hovered = False
         self.is_pressed = False
         self.drag_start_position = None
@@ -44,7 +52,7 @@ class IconWidget(QWidget):
         self.icon_label = None
         self.name_label = None
         
-        self.setup_ui()
+        self.setup_ui(widget_size)
         self.setup_animations()
         self.load_icon()
         
@@ -52,9 +60,9 @@ class IconWidget(QWidget):
         self.setMouseTracking(True)
         self.setAttribute(Qt.WidgetAttribute.WA_Hover)
     
-    def setup_ui(self):
+    def setup_ui(self, widget_size: int):
         """Setup the user interface"""
-        self.setFixedSize(64, 64)  # Padding around 48px icon
+        self.setFixedSize(widget_size, widget_size)  # Dynamic size based on icon size + padding
         
         layout = QVBoxLayout()
         layout.setContentsMargins(8, 8, 8, 8)

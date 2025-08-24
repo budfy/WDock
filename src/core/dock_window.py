@@ -113,11 +113,13 @@ class DockWindow(QWidget):
         # Create appropriate layout for position
         if position in ["top", "bottom"]:
             self.dock_layout = QHBoxLayout()
-            self.setFixedHeight(60)
+            # Remove fixed constraints to allow dynamic sizing
             self.setMaximumWidth(16777215)  # Remove width constraint
+            self.setMaximumHeight(16777215)  # Allow height to be dynamic too
         else:  # left, right
             self.dock_layout = QVBoxLayout()
-            self.setFixedWidth(60)
+            # Remove fixed constraints to allow dynamic sizing
+            self.setMaximumWidth(16777215)   # Allow width to be dynamic
             self.setMaximumHeight(16777215)  # Remove height constraint
         
         self.dock_layout.setContentsMargins(8, 8, 8, 8)
@@ -286,22 +288,70 @@ class DockWindow(QWidget):
     def calculate_dock_size(self, position: str) -> tuple:
         """Calculate appropriate dock size based on content and position"""
         icon_count = max(1, self.dock_layout.count() if hasattr(self, 'dock_layout') else 1)  # At least 1 to avoid zero width
-        icon_size = 48
-        margin = 16  # Total margins (8 on each side)
-        spacing = 4
+        
+        # Get actual icon size from settings (unified settings system)
+        configured_icon_size = self.config_manager.get_setting("appearance", "icon_size", 48)
+        
+        # IconWidget is configured_icon_size + 16px padding (8px on each side)
+        icon_widget_size = configured_icon_size + 16
+        
+        # Layout spacing and margins
+        layout_spacing = 4
+        layout_margins = 16  # Total margins (8 on each side)
         
         if position in ["top", "bottom"]:
             # Horizontal layout
-            width = (icon_count * icon_size) + ((icon_count - 1) * spacing) + margin
-            width = max(200, min(width, 800))  # Reasonable bounds
-            height = 60
+            width = (icon_count * icon_widget_size) + ((icon_count - 1) * layout_spacing) + layout_margins
+            width = max(100, min(width, 1200))  # Reasonable bounds
+            height = icon_widget_size + layout_margins  # Widget height + margins
         else:
             # Vertical layout (left, right)
-            width = 60
-            height = (icon_count * icon_size) + ((icon_count - 1) * spacing) + margin
-            height = max(200, min(height, 600))  # Reasonable bounds
+            width = icon_widget_size + layout_margins  # Widget width + margins
+            height = (icon_count * icon_widget_size) + ((icon_count - 1) * layout_spacing) + layout_margins
+            height = max(100, min(height, 800))  # Reasonable bounds
         
         return width, height
+    
+    def update_dock_size(self):
+        """Update dock size based on current content and reposition"""
+        # Only update if we have a layout
+        if not hasattr(self, 'dock_layout') or not self.dock_layout:
+            return
+        
+        # Get current position and recalculate size
+        position = self.config_manager.get("position", "bottom")
+        new_width, new_height = self.calculate_dock_size(position)
+        
+        # Get current geometry to maintain position relative to screen
+        current_geo = self.geometry()
+        
+        # Update size while maintaining position logic
+        self.position_dock()  # This will use the new calculated size
+    
+    def update_icon_sizes(self):
+        """Update all icon widget sizes when icon size setting changes"""
+        if not hasattr(self, 'dock_layout') or not self.dock_layout:
+            return
+        
+        # Get new icon size from settings
+        new_icon_size = self.config_manager.get_setting("appearance", "icon_size", 48)
+        new_widget_size = new_icon_size + 16
+        
+        # Update all icon widgets
+        for i in range(self.dock_layout.count()):
+            item = self.dock_layout.itemAt(i)
+            if item and item.widget():
+                widget = item.widget()
+                # Update IconWidget if it has icon_size attribute
+                if hasattr(widget, 'icon_size'):
+                    widget.icon_size = new_icon_size
+                    widget.setFixedSize(new_widget_size, new_widget_size)
+                    # Reload the icon with new size
+                    if hasattr(widget, 'load_icon'):
+                        widget.load_icon()
+        
+        # Update dock size after changing icon sizes
+        self.update_dock_size()
     
     def position_bottom(self, work_area: QRect, alignment: str):
         """Position dock at bottom"""
@@ -618,6 +668,9 @@ class DockWindow(QWidget):
         for group_name, group_icons in grouped_icons.items():
             group_data = groups[group_name]
             self.add_group_widget(group_data, group_icons)
+        
+        # Recalculate dock size after loading icons
+        self.update_dock_size()
     
     def clear_layout(self):
         """Clear all widgets from the layout"""
@@ -630,7 +683,7 @@ class DockWindow(QWidget):
     def add_icon_to_dock(self, file_path: str, name: str = None):
         """Add a new icon to the dock"""
         self.config_manager.add_icon(file_path, name)
-        self.load_icons()  # Reload to refresh display
+        self.load_icons()  # Reload to refresh display (includes size update)
     
     def add_icon_widget(self, icon_data: dict):
         """Add an icon widget to the layout"""
@@ -656,8 +709,8 @@ class DockWindow(QWidget):
             self.dock_layout.removeWidget(icon_widget)
         icon_widget.deleteLater()
         
-        # Reposition dock if needed
-        self.position_dock()
+        # Update dock size after removing icon
+        self.update_dock_size()
     
     def show_drop_zones(self, pos: QPoint):
         """Show drop zones for visual feedback"""
