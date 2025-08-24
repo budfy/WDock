@@ -65,7 +65,7 @@ def main():
         
         # Connect settings signals
         settings_window.position_changed.connect(dock_window.position_dock)
-        settings_window.settings_changed.connect(dock_window.load_icons)
+        settings_window.settings_changed.connect(dock_window.update_appearance)
         
         settings_window.exec()
     

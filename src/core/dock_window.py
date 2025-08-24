@@ -27,11 +27,12 @@ class DockWindow(QWidget):
     def __init__(self, config_manager: ConfigManager):
         super().__init__()
         self.config_manager = config_manager
-        self.monitor_manager = get_monitor_manager()
+        self.monitor_manager = None  # Initialize later
         self.is_hidden = False
         self.auto_hide_timer = QTimer()
         self.hide_animation = None
         self.show_animation = None
+        self.original_geometry = None  # Track original geometry for hidden state handling
         
         # Drop zones for visual feedback
         self.drop_zone = DropZoneWidget(self)
@@ -43,6 +44,13 @@ class DockWindow(QWidget):
         self.setup_animations()
         self.setup_auto_hide()
         self.load_icons()
+        # Delay position_dock until after the application is fully initialized
+        QTimer.singleShot(100, self.initialize_and_position_dock)
+    
+    def initialize_and_position_dock(self):
+        """Initialize monitor manager and position dock after QApplication is ready"""
+        # Initialize monitor manager now that QApplication is ready
+        self.monitor_manager = get_monitor_manager()
         self.position_dock()
     
     def setup_window(self):
@@ -125,14 +133,15 @@ class DockWindow(QWidget):
         self.dock_layout.setContentsMargins(8, 8, 8, 8)
         self.dock_layout.setSpacing(4)
         
-        # Only set layout if container doesn't have one
-        if not self.container.layout():
-            self.container.setLayout(self.dock_layout)
-        else:
-            # Replace the existing layout
+        # Check if container already has a layout
+        if self.container.layout():
+            # Remove the existing layout properly
             old_layout = self.container.layout()
+            self.container.setLayout(None)  # Remove the layout first
             old_layout.deleteLater()
-            self.container.setLayout(self.dock_layout)
+        
+        # Set the new layout
+        self.container.setLayout(self.dock_layout)
         
         # Restore widgets
         for widget in widgets:
@@ -167,10 +176,10 @@ class DockWindow(QWidget):
         
         # Add drop shadow effect with reduced blur to avoid coordinate issues
         shadow = QGraphicsDropShadowEffect()
-        shadow.setBlurRadius(10)  # Reduced from 20 to avoid positioning issues
+        shadow.setBlurRadius(5)  # Further reduced from 10 to avoid positioning issues
         shadow.setXOffset(0)
         shadow.setYOffset(1)      # Reduced from 2
-        shadow.setColor(QColor(0, 0, 0, 40))  # Reduced opacity from 60
+        shadow.setColor(QColor(0, 0, 0, 30))  # Reduced opacity from 40
         self.container.setGraphicsEffect(shadow)
     
     def is_dark_theme(self) -> bool:
@@ -208,9 +217,48 @@ class DockWindow(QWidget):
         if not self.config_manager.get("auto_hide", True):
             return
         
-        # Get cursor position
-        cursor_pos = self.mapFromGlobal(self.cursor().pos())
-        is_cursor_over = self.rect().contains(cursor_pos)
+        # Get cursor position in global coordinates
+        cursor_global_pos = self.cursor().pos()
+        
+        # Determine if cursor is over the dock (accounting for hidden state)
+        if self.is_hidden:
+            # When hidden, check if cursor is over the visible portion (5px strip)
+            position = self.config_manager.get("position", "bottom")
+            
+            # Use original geometry to determine where the visible strip should be
+            if self.original_geometry:
+                original_geo = self.original_geometry
+            else:
+                original_geo = self.geometry()
+            
+            # Calculate the visible strip area based on dock position
+            if position == "bottom":
+                # Hidden at bottom - check 5px strip at bottom of screen
+                visible_rect = QRect(original_geo.x(), 
+                                   original_geo.y() + original_geo.height() - 5,
+                                   original_geo.width(), 5)
+            elif position == "top":
+                # Hidden at top - check 5px strip at top of screen
+                visible_rect = QRect(original_geo.x(), 
+                                   original_geo.y() - 5,
+                                   original_geo.width(), 5)
+            elif position == "left":
+                # Hidden at left - check 5px strip at left of screen
+                visible_rect = QRect(original_geo.x() - 5, 
+                                   original_geo.y(),
+                                   5, original_geo.height())
+            else:  # right
+                # Hidden at right - check 5px strip at right of screen
+                visible_rect = QRect(original_geo.x() + original_geo.width() - 5, 
+                                   original_geo.y(),
+                                   5, original_geo.height())
+            
+            # Check if cursor is over the visible strip (in global coordinates)
+            is_cursor_over = visible_rect.contains(cursor_global_pos)
+        else:
+            # When not hidden, check normal dock rectangle
+            cursor_local_pos = self.mapFromGlobal(cursor_global_pos)
+            is_cursor_over = self.rect().contains(cursor_local_pos)
         
         # Check if intelligent hide is enabled
         if self.config_manager.get("intelligent_hide", True):
@@ -256,10 +304,32 @@ class DockWindow(QWidget):
     def get_work_area(self) -> QRect:
         """Get the work area (screen minus taskbar)"""
         # Use multi-monitor manager for better work area detection
-        return self.monitor_manager.get_work_area()
+        if self.monitor_manager:
+            return self.monitor_manager.get_work_area()
+        else:
+            # Fallback to primary screen if monitor manager not ready
+            app = QApplication.instance()
+            if app and app.primaryScreen():
+                return app.primaryScreen().availableGeometry()
+            else:
+                # Ultimate fallback
+                return QRect(0, 0, 1920, 1080)
     
     def position_dock(self):
         """Position the dock according to configuration"""
+        # Safety check - ensure monitor manager is available
+        if not self.monitor_manager:
+            # Try to initialize it now
+            try:
+                self.monitor_manager = get_monitor_manager()
+            except:
+                pass
+            
+            # If still not available, delay positioning
+            if not self.monitor_manager:
+                QTimer.singleShot(100, self.position_dock)
+                return
+        
         position = self.config_manager.get("position", "bottom")
         alignment = self.config_manager.get("alignment", "center")
         
@@ -282,6 +352,9 @@ class DockWindow(QWidget):
             self.position_left(work_area, alignment)
         elif position == "right":
             self.position_right(work_area, alignment)
+        
+        # Clear original geometry when manually repositioning
+        self.original_geometry = None
         
         self.position_changed.emit(position)
     
@@ -429,21 +502,37 @@ class DockWindow(QWidget):
             return
         
         self.is_hidden = True
+        # Store original geometry before hiding
+        self.original_geometry = self.geometry()
+        
         position = self.config_manager.get("position", "bottom")
         current_geo = self.geometry()
         
+        # Calculate target position to keep a small portion visible
         if position == "bottom":
-            target_geo = QRect(current_geo.x(), current_geo.y() + current_geo.height() - 5,
-                              current_geo.width(), current_geo.height())
+            # Move up but keep 5px visible at the bottom of the screen
+            target_geo = QRect(current_geo.x(), 
+                              current_geo.y() + current_geo.height() - 5,
+                              current_geo.width(), 
+                              5)  # Only 5px height visible
         elif position == "top":
-            target_geo = QRect(current_geo.x(), current_geo.y() - current_geo.height() + 5,
-                              current_geo.width(), current_geo.height())
+            # Move up but keep 5px visible at the top of the screen
+            target_geo = QRect(current_geo.x(), 
+                              current_geo.y() - current_geo.height() + 5,
+                              current_geo.width(), 
+                              5)  # Only 5px height visible
         elif position == "left":
-            target_geo = QRect(current_geo.x() - current_geo.width() + 5, current_geo.y(),
-                              current_geo.width(), current_geo.height())
+            # Move left but keep 5px visible at the left of the screen
+            target_geo = QRect(current_geo.x() - current_geo.width() + 5, 
+                              current_geo.y(),
+                              5,  # Only 5px width visible
+                              current_geo.height())
         else:  # right
-            target_geo = QRect(current_geo.x() + current_geo.width() - 5, current_geo.y(),
-                              current_geo.width(), current_geo.height())
+            # Move right but keep 5px visible at the right of the screen
+            target_geo = QRect(current_geo.x() + current_geo.width() - 5, 
+                              current_geo.y(),
+                              5,  # Only 5px width visible
+                              current_geo.height())
         
         self.hide_animation.setStartValue(current_geo)
         self.hide_animation.setEndValue(target_geo)
@@ -457,27 +546,32 @@ class DockWindow(QWidget):
         self.is_hidden = False
         current_geo = self.geometry()
         
-        # Calculate target position
-        work_area = self.get_work_area()
-        position = self.config_manager.get("position", "bottom")
-        alignment = self.config_manager.get("alignment", "center")
+        # Calculate target position using original geometry if available
+        if self.original_geometry:
+            target_geo = self.original_geometry
+        else:
+            # Fallback to recalculating position
+            work_area = self.get_work_area()
+            position = self.config_manager.get("position", "bottom")
+            alignment = self.config_manager.get("alignment", "center")
+            
+            # Ensure position and alignment are not None
+            if position is None:
+                position = "bottom"
+            if alignment is None:
+                alignment = "center"
+            
+            if position == "bottom":
+                self.position_bottom(work_area, alignment)
+            elif position == "top":
+                self.position_top(work_area, alignment)
+            elif position == "left":
+                self.position_left(work_area, alignment)
+            elif position == "right":
+                self.position_right(work_area, alignment)
+            
+            target_geo = self.geometry()
         
-        # Ensure position and alignment are not None
-        if position is None:
-            position = "bottom"
-        if alignment is None:
-            alignment = "center"
-        
-        if position == "bottom":
-            self.position_bottom(work_area, alignment)
-        elif position == "top":
-            self.position_top(work_area, alignment)
-        elif position == "left":
-            self.position_left(work_area, alignment)
-        elif position == "right":
-            self.position_right(work_area, alignment)
-        
-        target_geo = self.geometry()
         self.setGeometry(current_geo)  # Reset to hidden position
         
         self.show_animation.setStartValue(current_geo)
@@ -896,3 +990,18 @@ class DockWindow(QWidget):
     def quit_application(self):
         """Quit the application"""
         QApplication.quit()
+    
+    def update_appearance(self):
+        """Update the dock's visual appearance based on current settings"""
+        # Update styles
+        self.apply_styles()
+        
+        # Update icon sizes if needed
+        self.update_icon_sizes()
+        
+        # Update layout if position changed
+        position = self.config_manager.get("position", "bottom")
+        self.update_layout_for_position(position)
+        
+        # Reposition the dock
+        self.position_dock()

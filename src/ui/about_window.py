@@ -5,7 +5,7 @@ Shows application information and version details
 
 from PyQt6.QtWidgets import (QDialog, QVBoxLayout, QHBoxLayout, QLabel, 
                              QPushButton, QFrame, QTextEdit, QApplication)
-from PyQt6.QtCore import Qt
+from PyQt6.QtCore import Qt, QRect
 from PyQt6.QtGui import QFont, QPixmap, QPainter, QColor, QBrush, QPen
 import sys
 
@@ -108,7 +108,8 @@ class AboutWindow(QDialog):
         info_layout.addWidget(python_label)
         
         # PyQt version
-        pyqt_version = f"PyQt {Qt.PYQT_VERSION_STR}"
+        from PyQt6.QtCore import QT_VERSION_STR
+        pyqt_version = f"PyQt {QT_VERSION_STR}"
         pyqt_label = QLabel(f"GUI Framework: {pyqt_version}")
         pyqt_label.setStyleSheet("color: #666666; font-size: 10px;")
         info_layout.addWidget(pyqt_label)

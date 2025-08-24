@@ -273,10 +273,10 @@ class GroupWidget(QWidget):
         
         # Add shadow effect with reduced blur to avoid coordinate issues
         shadow = QGraphicsDropShadowEffect()
-        shadow.setBlurRadius(8)   # Reduced from 20 to prevent positioning issues
+        shadow.setBlurRadius(5)   # Further reduced from 8 to prevent positioning issues
         shadow.setXOffset(0)
-        shadow.setYOffset(2)      # Reduced from 4
-        shadow.setColor(QColor(0, 0, 0, 60))  # Reduced opacity from 100
+        shadow.setYOffset(1)      # Reduced from 2
+        shadow.setColor(QColor(0, 0, 0, 40))  # Reduced opacity from 60
         self.popup_widget.setGraphicsEffect(shadow)
         
         # Layout for icons
