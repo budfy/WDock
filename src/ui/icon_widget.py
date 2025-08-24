@@ -431,20 +431,28 @@ class IconWidget(QWidget):
     
     def mouseReleaseEvent(self, event):
         """Handle mouse release"""
-        if event.button() == Qt.MouseButton.LeftButton and self.is_pressed:
-            self.is_pressed = False
-            self.drag_start_position = None
-            self.animate_press(False)
+        try:
+            if event.button() == Qt.MouseButton.LeftButton and self.is_pressed:
+                self.is_pressed = False
+                self.drag_start_position = None
+                self.animate_press(False)
+                
+                # Only launch if we didn't drag
+                if self.rect().contains(event.position().toPoint()):
+                    self.launch_application()
+                    # Only emit signal if widget is still valid
+                    if not self.parent() is None:
+                        self.clicked.emit()
             
-            # Only launch if we didn't drag
-            if self.rect().contains(event.position().toPoint()):
-                self.launch_application()
-                self.clicked.emit()
-        
-        elif event.button() == Qt.MouseButton.RightButton:
-            # Show context menu on right-click
-            self.show_context_menu(event.position().toPoint())
-            self.right_clicked.emit()
+            elif event.button() == Qt.MouseButton.RightButton:
+                # Show context menu on right-click
+                self.show_context_menu(event.position().toPoint())
+                # Only emit signal if widget is still valid
+                if not self.parent() is None:
+                    self.right_clicked.emit()
+        except RuntimeError:
+            # Widget has been deleted, ignore the event
+            pass
         
         super().mouseReleaseEvent(event)
     
@@ -528,10 +536,14 @@ class IconWidget(QWidget):
         self.bounce_animation.setEndValue(bounce_geo)
         
         def return_to_normal():
-            self.bounce_animation.setStartValue(bounce_geo)
-            self.bounce_animation.setEndValue(current_geo)
-            self.bounce_animation.finished.disconnect()
-            self.bounce_animation.start()
+            try:
+                self.bounce_animation.setStartValue(bounce_geo)
+                self.bounce_animation.setEndValue(current_geo)
+                self.bounce_animation.finished.disconnect()
+                self.bounce_animation.start()
+            except RuntimeError:
+                # Widget has been deleted, ignore the callback
+                pass
         
         self.bounce_animation.finished.connect(return_to_normal)
         self.bounce_animation.start()

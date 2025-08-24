@@ -217,14 +217,22 @@ class GroupWidget(QWidget):
     
     def mousePressEvent(self, event):
         """Handle mouse press"""
-        if event.button() == Qt.MouseButton.LeftButton:
-            if self.is_expanded:
-                self.collapse_group()
-            else:
-                self.expand_group()
-            self.clicked.emit()
-        elif event.button() == Qt.MouseButton.RightButton:
-            self.right_clicked.emit()
+        try:
+            if event.button() == Qt.MouseButton.LeftButton:
+                if self.is_expanded:
+                    self.collapse_group()
+                else:
+                    self.expand_group()
+                # Only emit signal if widget is still valid
+                if not self.parent() is None:
+                    self.clicked.emit()
+            elif event.button() == Qt.MouseButton.RightButton:
+                # Only emit signal if widget is still valid
+                if not self.parent() is None:
+                    self.right_clicked.emit()
+        except RuntimeError:
+            # Widget has been deleted, ignore the event
+            pass
         
         super().mousePressEvent(event)
     
@@ -263,12 +271,12 @@ class GroupWidget(QWidget):
             }
         """)
         
-        # Add shadow effect
+        # Add shadow effect with reduced blur to avoid coordinate issues
         shadow = QGraphicsDropShadowEffect()
-        shadow.setBlurRadius(20)
+        shadow.setBlurRadius(8)   # Reduced from 20 to prevent positioning issues
         shadow.setXOffset(0)
-        shadow.setYOffset(4)
-        shadow.setColor(QColor(0, 0, 0, 100))
+        shadow.setYOffset(2)      # Reduced from 4
+        shadow.setColor(QColor(0, 0, 0, 60))  # Reduced opacity from 100
         self.popup_widget.setGraphicsEffect(shadow)
         
         # Layout for icons
@@ -373,10 +381,14 @@ class GroupWidget(QWidget):
     
     def check_close_popup(self):
         """Check if popup should be closed"""
-        if self.is_expanded and self.popup_widget:
-            # Check if mouse is over popup or group
-            if not (self.underMouse() or self.popup_widget.underMouse()):
-                self.collapse_group()
+        try:
+            if self.is_expanded and self.popup_widget:
+                # Check if mouse is over popup or group
+                if not (self.underMouse() or self.popup_widget.underMouse()):
+                    self.collapse_group()
+        except RuntimeError:
+            # Widget has been deleted, ignore the event
+            pass
     
     def animate_hover(self, entering: bool):
         """Animate hover effect"""
