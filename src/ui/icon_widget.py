@@ -746,9 +746,16 @@ class IconWidget(QWidget):
         )
         
         if reply == QMessageBox.StandardButton.Yes:
-            # TODO: Remove from config and parent layout
-            self.setParent(None)
-            self.deleteLater()
+            # Get parent dock window and delegate proper removal
+            dock_window = self.get_dock_window()
+            if dock_window:
+                # Use the dock window's proper removal method
+                # This handles config removal, layout cleanup, and dock size update
+                dock_window.remove_icon_widget(self)
+            else:
+                # Fallback if dock window not found
+                self.setParent(None)
+                self.deleteLater()
     
     def show_properties(self):
         """Show Windows properties dialog for the shortcut"""
