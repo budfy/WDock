@@ -712,6 +712,59 @@ class DockWindow(QWidget):
         # Update dock size after removing icon
         self.update_dock_size()
     
+    def remove_group_widget(self, group_widget):
+        """Remove a group widget from the dock (ungroup)"""
+        # Find the group name by matching group data
+        group_name = None
+        for name, data in self.config_manager.get_groups().items():
+            if data == group_widget.group_data:
+                group_name = name
+                break
+        
+        if group_name:
+            # Remove the group (this ungroups all icons in the group)
+            self.config_manager.remove_group(group_name)
+        
+        # Remove widget from layout
+        if hasattr(self, 'dock_layout'):
+            self.dock_layout.removeWidget(group_widget)
+        group_widget.deleteLater()
+        
+        # Reload to show ungrouped icons and update dock size
+        self.load_icons()
+    
+    def delete_group_widget(self, group_widget):
+        """Delete a group widget and all its icons from the dock"""
+        # Find the group name by matching group data
+        group_name = None
+        for name, data in self.config_manager.get_groups().items():
+            if data == group_widget.group_data:
+                group_name = name
+                break
+        
+        if group_name:
+            # Remove all icons that belong to this group
+            icons_to_remove = []
+            for icon in self.config_manager.get_icons():
+                if icon.get("group") == group_name:
+                    icons_to_remove.append(icon["path"])
+            
+            # Remove the icons
+            for icon_path in icons_to_remove:
+                self.config_manager.remove_icon(icon_path)
+            
+            # Remove the group itself
+            del self.config_manager.config["groups"][group_name]
+            self.config_manager.save_config()
+        
+        # Remove widget from layout
+        if hasattr(self, 'dock_layout'):
+            self.dock_layout.removeWidget(group_widget)
+        group_widget.deleteLater()
+        
+        # Reload to update display and dock size
+        self.load_icons()
+    
     def show_drop_zones(self, pos: QPoint):
         """Show drop zones for visual feedback"""
         # Find widget under cursor

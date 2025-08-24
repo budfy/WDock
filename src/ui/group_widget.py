@@ -499,8 +499,16 @@ class GroupWidget(QWidget):
         )
         
         if reply == QMessageBox.StandardButton.Yes:
-            # TODO: Implement ungrouping logic
-            pass
+            # Get parent dock window and delegate proper ungrouping
+            dock_window = self.get_dock_window()
+            if dock_window:
+                # Use the dock window's proper ungrouping method
+                # This handles config cleanup, layout removal, and reloading ungrouped icons
+                dock_window.remove_group_widget(self)
+            else:
+                # Fallback if dock window not found
+                self.setParent(None)
+                self.deleteLater()
     
     def delete_group(self):
         """Delete the entire group"""
@@ -514,11 +522,28 @@ class GroupWidget(QWidget):
         )
         
         if reply == QMessageBox.StandardButton.Yes:
-            # TODO: Implement group deletion logic
-            self.setParent(None)
-            self.deleteLater()
+            # Get parent dock window and delegate proper group deletion
+            dock_window = self.get_dock_window()
+            if dock_window:
+                # Use the dock window's proper group deletion method
+                # This handles config cleanup, icon removal, layout removal, and dock size update
+                dock_window.delete_group_widget(self)
+            else:
+                # Fallback if dock window not found
+                self.setParent(None)
+                self.deleteLater()
     
     def update_count(self):
         """Update the count badge"""
         self.count_label.setText(str(len(self.icons)))
         self.setToolTip(f"{self.group_data.get('name', 'Group')} ({len(self.icons)} items)")
+    
+    def get_dock_window(self):
+        """Get the parent dock window"""
+        # Traverse up the parent hierarchy to find the dock window
+        parent = self.parent()
+        while parent:
+            if hasattr(parent, '__class__') and parent.__class__.__name__ == 'DockWindow':
+                return parent
+            parent = parent.parent()
+        return None
