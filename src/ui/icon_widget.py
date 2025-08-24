@@ -106,6 +106,7 @@ class IconWidget(QWidget):
         
         if not icon_path or not os.path.exists(icon_path):
             # Use default icon
+            print(f"Icon path invalid or doesn't exist: {icon_path}")
             self.set_default_icon()
             return
         
@@ -126,7 +127,9 @@ class IconWidget(QWidget):
                     Qt.TransformationMode.SmoothTransformation
                 )
                 self.icon_label.setPixmap(scaled_pixmap)
+                print(f"Successfully loaded icon for {self.icon_data.get('name', 'Unknown')}")
             else:
+                print(f"Failed to extract icon for {self.icon_data.get('name', 'Unknown')}, using default")
                 self.set_default_icon()
                 
         except Exception as e:
@@ -135,6 +138,31 @@ class IconWidget(QWidget):
     
     def extract_shortcut_icon(self, lnk_path: str) -> QPixmap:
         """Extract icon from .lnk shortcut file"""
+        # Method 1: Try QFileIconProvider first (most reliable for shortcuts)
+        try:
+            from PyQt6.QtWidgets import QFileIconProvider
+            from PyQt6.QtCore import QFileInfo
+            
+            provider = QFileIconProvider()
+            file_info = QFileInfo(lnk_path)
+            icon = provider.icon(file_info)
+            
+            if not icon.isNull():
+                available_sizes = icon.availableSizes()
+                if available_sizes:
+                    largest_size = max(available_sizes, key=lambda s: s.width() * s.height())
+                    pixmap = icon.pixmap(largest_size)
+                    
+                    if not pixmap.isNull() and pixmap.width() > 16:  # Ensure it's not just a tiny generic icon
+                        return pixmap.scaled(
+                            self.icon_size, self.icon_size,
+                            Qt.AspectRatioMode.KeepAspectRatio,
+                            Qt.TransformationMode.SmoothTransformation
+                        )
+        except Exception as e:
+            print(f"QFileIconProvider shortcut method failed: {e}")
+        
+        # Method 2: Extract target path and get icon from target
         try:
             import pythoncom
             from win32com.shell import shell, shellcon
@@ -150,45 +178,106 @@ class IconWidget(QWidget):
             
             # Get target path and extract icon from it
             target_path, _ = shortcut.GetPath(shell.SLGP_SHORTPATH)
-            if target_path:
+            if target_path and os.path.exists(target_path):
                 return self.extract_exe_icon(target_path)
             
         except Exception as e:
             print(f"Error extracting shortcut icon: {e}")
         
-        return self.create_generic_icon()
+        # Method 3: Fallback to app-style icon
+        return self.create_app_style_icon(lnk_path)
     
     def extract_exe_icon(self, exe_path: str) -> QPixmap:
-        """Extract icon from executable file"""
+        """Extract icon from executable file using multiple fallback methods"""
+        # Method 1: Try using QFileIconProvider (most reliable)
         try:
-            # Use Windows API to extract icon
+            from PyQt6.QtWidgets import QFileIconProvider
+            from PyQt6.QtCore import QFileInfo
+            
+            provider = QFileIconProvider()
+            file_info = QFileInfo(exe_path)
+            icon = provider.icon(file_info)
+            
+            if not icon.isNull():
+                # Get the largest available size
+                available_sizes = icon.availableSizes()
+                if available_sizes:
+                    # Use the largest available size
+                    largest_size = max(available_sizes, key=lambda s: s.width() * s.height())
+                    pixmap = icon.pixmap(largest_size)
+                    
+                    if not pixmap.isNull():
+                        return pixmap.scaled(
+                            self.icon_size, self.icon_size,
+                            Qt.AspectRatioMode.KeepAspectRatio,
+                            Qt.TransformationMode.SmoothTransformation
+                        )
+        except Exception as e:
+            print(f"QFileIconProvider method failed: {e}")
+        
+        # Method 2: Try Windows API with PIL conversion
+        try:
             large_icons, small_icons = win32gui.ExtractIconEx(exe_path, 0)
             
             if large_icons:
-                # In PyQt6, QPixmap.fromWinHICON was removed
-                # Use alternative method with win32api
-                import win32api
-                import tempfile
-                import os
+                icon_handle = large_icons[0]
                 
-                # Save icon to temporary file and load as QPixmap
-                temp_dir = tempfile.gettempdir()
-                temp_icon_path = os.path.join(temp_dir, f"wdock_temp_icon_{id(self)}.ico")
+                # Get icon info
+                icon_info = win32gui.GetIconInfo(icon_handle)
                 
+                # Try to create a bitmap and convert to PIL Image
                 try:
-                    # Save icon handle to file
-                    win32api.SaveIcon(large_icons[0], temp_icon_path)
+                    import win32ui
+                    import win32con
+                    from PIL import Image, ImageQt
                     
-                    # Load from file
-                    pixmap = QPixmap(temp_icon_path)
+                    # Create device context
+                    dc = win32ui.CreateDCFromHandle(win32gui.GetDC(0))
+                    mem_dc = dc.CreateCompatibleDC()
                     
-                    # Clean up temp file
-                    if os.path.exists(temp_icon_path):
-                        os.remove(temp_icon_path)
+                    # Create bitmap
+                    bitmap = win32ui.CreateBitmap()
+                    bitmap.CreateCompatibleBitmap(dc, self.icon_size, self.icon_size)
+                    mem_dc.SelectObject(bitmap)
+                    
+                    # Fill with white background
+                    mem_dc.FillSolidRect((0, 0, self.icon_size, self.icon_size), 0xFFFFFF)
+                    
+                    # Draw icon
+                    win32gui.DrawIconEx(
+                        mem_dc.GetSafeHdc(), 0, 0, icon_handle,
+                        self.icon_size, self.icon_size, 0, None, win32con.DI_NORMAL
+                    )
+                    
+                    # Get bitmap bits
+                    bmp_info = bitmap.GetInfo()
+                    bmp_str = bitmap.GetBitmapBits(True)
+                    
+                    # Convert to PIL Image
+                    img = Image.frombuffer(
+                        'RGB',
+                        (bmp_info['bmWidth'], bmp_info['bmHeight']),
+                        bmp_str, 'raw', 'BGRX', 0, 1
+                    )
+                    
+                    # Convert PIL Image to QPixmap
+                    pixmap = QPixmap.fromImage(ImageQt.ImageQt(img))
+                    
+                    # Clean up
+                    mem_dc.DeleteDC()
+                    dc.DeleteDC()
+                    win32gui.ReleaseDC(0, win32gui.GetDC(0))
+                    
+                    if not pixmap.isNull():
+                        # Clean up handles
+                        for icon_handle in large_icons:
+                            win32gui.DestroyIcon(icon_handle)
+                        for icon_handle in small_icons:
+                            win32gui.DestroyIcon(icon_handle)
+                        return pixmap
                         
-                except Exception:
-                    # Fallback: create generic icon
-                    pixmap = self.create_generic_icon()
+                except Exception as e:
+                    print(f"PIL conversion method failed: {e}")
                 
                 # Clean up handles
                 for icon_handle in large_icons:
@@ -196,15 +285,67 @@ class IconWidget(QWidget):
                 for icon_handle in small_icons:
                     win32gui.DestroyIcon(icon_handle)
                 
-                if not pixmap.isNull():
-                    return pixmap.scaled(self.icon_size, self.icon_size, 
-                                       Qt.AspectRatioMode.KeepAspectRatio,
-                                       Qt.TransformationMode.SmoothTransformation)
-                
         except Exception as e:
-            print(f"Error extracting exe icon: {e}")
+            print(f"Windows API method failed: {e}")
         
-        return self.create_generic_icon()
+        # Method 3: Create an application-style icon as fallback
+        return self.create_app_style_icon(exe_path)
+    
+    def create_app_style_icon(self, file_path: str) -> QPixmap:
+        """Create a more sophisticated application-style icon"""
+        pixmap = QPixmap(self.icon_size, self.icon_size)
+        pixmap.fill(Qt.GlobalColor.transparent)
+        
+        painter = QPainter(pixmap)
+        painter.setRenderHint(QPainter.RenderHint.Antialiasing)
+        
+        # Draw a rounded square background
+        rect = QRect(2, 2, self.icon_size - 4, self.icon_size - 4)
+        path = QPainterPath()
+        from PyQt6.QtCore import QRectF
+        path.addRoundedRect(QRectF(rect), 8, 8)
+        
+        # Use a nice gradient based on file name
+        file_name = os.path.basename(file_path).lower()
+        hash_value = hash(file_name) % 7
+        
+        colors = [
+            QColor(76, 175, 80),   # Green
+            QColor(33, 150, 243),  # Blue
+            QColor(255, 152, 0),   # Orange
+            QColor(156, 39, 176),  # Purple
+            QColor(244, 67, 54),   # Red
+            QColor(0, 188, 212),   # Cyan
+            QColor(255, 193, 7),   # Yellow
+        ]
+        
+        color = colors[hash_value]
+        painter.fillPath(path, QBrush(color))
+        
+        # Draw border
+        painter.setPen(QPen(color.darker(120), 2))
+        painter.drawPath(path)
+        
+        # Draw application icon symbol (gear/cog)
+        painter.setPen(QPen(Qt.GlobalColor.white, 2))
+        painter.setBrush(QBrush(Qt.GlobalColor.white))
+        
+        # Draw a simple app symbol
+        center_x = self.icon_size // 2
+        center_y = self.icon_size // 2
+        
+        # Draw a window-like symbol
+        inner_rect = QRect(center_x - 8, center_y - 8, 16, 16)
+        painter.fillRect(inner_rect, QBrush(Qt.GlobalColor.white))
+        painter.setPen(QPen(color, 1))
+        painter.drawRect(inner_rect)
+        
+        # Draw title bar
+        title_rect = QRect(center_x - 8, center_y - 8, 16, 4)
+        painter.fillRect(title_rect, QBrush(color))
+        
+        painter.end()
+        return pixmap
     
     def create_generic_icon(self) -> QPixmap:
         """Create a generic application icon"""
