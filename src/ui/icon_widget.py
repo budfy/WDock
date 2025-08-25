@@ -800,13 +800,19 @@ class IconWidget(QWidget):
         """Toggle auto-hide functionality"""
         dock_window = self.get_dock_window()
         if dock_window:
-            dock_window.toggle_auto_hide()
+            # Get current value from config and toggle it
+            config_manager = dock_window.config_manager
+            current_value = config_manager.get("auto_hide", True)
+            dock_window.toggle_auto_hide(not current_value)
     
     def toggle_intelligent_hide(self):
         """Toggle intelligent hide functionality"""
         dock_window = self.get_dock_window()
         if dock_window:
-            dock_window.toggle_intelligent_hide()
+            # Get current value from config and toggle it
+            config_manager = dock_window.config_manager
+            current_value = config_manager.get("intelligent_hide", True)
+            dock_window.toggle_intelligent_hide(not current_value)
     
     def show_settings(self):
         """Show settings window"""
